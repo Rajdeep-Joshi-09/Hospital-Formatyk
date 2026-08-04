@@ -1,15 +1,30 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Settings, Activity } from 'lucide-react';
+import * as Icons from 'lucide-react';
+import api from '../utils/api';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
+  const [navItems, setNavItems] = useState([]);
 
-  const navItems = [
-    { name: 'Dashboard', path: '/admin', icon: <LayoutDashboard size={20} /> },
-    { name: 'Users', path: '/admin/users', icon: <Users size={20} /> },
-    { name: 'Analytics', path: '/admin/analytics', icon: <Activity size={20} /> },
-    { name: 'Settings', path: '/admin/settings', icon: <Settings size={20} /> },
-  ];
+  useEffect(() => {
+    const fetchMenus = async () => {
+      try {
+        const response = await api.get('/menus');
+        if (response.data.status) {
+          setNavItems(response.data.result);
+        }
+      } catch (error) {
+        console.error('Failed to fetch sidebar menus:', error);
+      }
+    };
+    fetchMenus();
+  }, []);
+
+  const renderIcon = (iconName) => {
+    const IconComponent = Icons[iconName] || Icons.Folder;
+    return <IconComponent size={20} />;
+  };
 
   return (
     <>
@@ -31,16 +46,19 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         {/* Navigation */}
         <nav className="flex-1 px-md py-lg overflow-y-auto space-y-2">
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path || (location.pathname.startsWith(item.path) && item.path !== '/admin');
+          {navItems.filter(m => !m.parentId).map((item) => {
+            const path = item.listPageRoute || '#';
+            const isActive = location.pathname === path || (location.pathname.startsWith(path) && path !== '/admin');
+            
+            // Render basic flat list for now. Submenus can be expanded here later.
             return (
               <Link 
-                key={item.name} 
-                to={item.path}
+                key={item.id} 
+                to={path}
                 className={`flex items-center gap-sm px-md py-sm rounded-lg font-label-md text-label-md transition-colors ${isActive ? 'bg-primary-container text-on-primary' : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'}`}
               >
-                {item.icon}
-                <span>{item.name}</span>
+                {renderIcon(item.icon)}
+                <span>{item.menuName}</span>
               </Link>
             )
           })}
@@ -57,3 +75,5 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 };
 
 export default Sidebar;
+
+// Force Vite reload

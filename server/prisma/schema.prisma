@@ -22,3 +22,26 @@ model User {
   deletedBy   Int
   deletedDate DateTime?
 }
+
+model Menu {
+  id            Int       @id @default(autoincrement())
+  menuName      String
+  pageName      String?
+  formPageRoute String?
+  listPageRoute String?
+  sortOrder     Int       @default(0)
+  icon          String?
+  
+  parentId      Int?
+  parent        Menu?     @relation("MenuHierarchy", fields: [parentId], references: [id])
+  submenus      Menu[]    @relation("MenuHierarchy")
+
+  isStatus      Int       @default(1)
+  isDelete      Int       @default(0)
+  createdBy     Int
+  createdAt     DateTime  @default(now())
+  updatedBy     Int
+  updatedDate   DateTime  @updatedAt
+  deletedBy     Int       @default(0)
+  deletedDate   DateTime?
+}

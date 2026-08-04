@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import UserList from './pages/UserList';
 import UserForm from './pages/UserForm';
+import MenuList from './pages/MenuList';
+import MenuForm from './pages/MenuForm';
 
 function App() {
   return (
@@ -20,6 +22,10 @@ function App() {
           <Route path="users" element={<UserList />} />
           <Route path="users/new" element={<UserForm />} />
           <Route path="users/edit/:id" element={<UserForm />} />
+          
+          <Route path="menus" element={<MenuList />} />
+          <Route path="menus/new" element={<MenuForm />} />
+          <Route path="menus/edit/:id" element={<MenuForm />} />
         </Route>
       </Routes>
     </BrowserRouter>

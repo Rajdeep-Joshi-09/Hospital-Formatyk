@@ -11,9 +11,11 @@ app.use(cookieParser());
 // Routes
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
+const menuRoutes = require('./routes/menuRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/menus', menuRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
