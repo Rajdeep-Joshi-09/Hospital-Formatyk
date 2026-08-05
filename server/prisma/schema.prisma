@@ -136,3 +136,16 @@ model Doctor {
   expertiesMaster ExpertiesMaster @relation(fields: [experties], references: [id])
   languageMaster  LanguageMaster  @relation(fields: [languages], references: [id])
 }
+
+model TreatmentTypeMaster {
+  id           Int       @id @default(autoincrement())
+  treatType    String    @db.VarChar
+  isStatus     Int       @default(1)
+  isDelete     Int       @default(0)
+  createdBy    Int
+  createdDate  DateTime  @default(now())
+  modifiedBy   Int?
+  modifiedDate DateTime? @updatedAt
+  deletedBy    Int?
+  deletedDate  DateTime?
+}

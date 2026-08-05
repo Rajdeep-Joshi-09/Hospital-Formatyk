@@ -19,6 +19,7 @@ const rolePermissionRoutes = require('./routes/rolePermissionRoutes');
 const expertiesRoutes = require('./routes/expertiesRoutes');
 const languageRoutes = require('./routes/languageRoutes');
 const doctorRoutes = require('./routes/doctorRoutes');
+const treatmentTypeRoutes = require('./routes/treatmentTypeRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -28,6 +29,7 @@ app.use('/api/permissions', rolePermissionRoutes);
 app.use('/api/experties', expertiesRoutes);
 app.use('/api/languages', languageRoutes);
 app.use('/api/doctors', doctorRoutes);
+app.use('/api/treatment-types', treatmentTypeRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
