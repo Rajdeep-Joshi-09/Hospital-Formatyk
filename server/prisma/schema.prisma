@@ -18,6 +18,7 @@ model UserTypeMaster {
   deletedBy    Int?
   deletedDate  DateTime?
   users        User[]
+  permissions  RolePermission[]
 }
 
 model User {
@@ -61,4 +62,25 @@ model Menu {
   updatedDate   DateTime  @updatedAt
   deletedBy     Int       @default(0)
   deletedDate   DateTime?
+  permissions   RolePermission[]
+}
+
+model RolePermission {
+  id           Int       @id @default(autoincrement())
+  userTypeId   Int
+  menuId       Int
+  isRead       Int       @default(0)
+  isWrite      Int       @default(0)
+  isEdit       Int       @default(0)
+  isDelete     Int       @default(0)
+
+  userType     UserTypeMaster @relation(fields: [userTypeId], references: [id])
+  menu         Menu           @relation(fields: [menuId], references: [id])
+
+  createdBy    Int
+  createdAt    DateTime  @default(now())
+  updatedBy    Int?
+  updatedDate  DateTime? @updatedAt
+  
+  @@unique([userTypeId, menuId])
 }

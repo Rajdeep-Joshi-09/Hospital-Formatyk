@@ -50,9 +50,32 @@ exports.createUser = async (req, res) => {
   }
 };
 
+// Helper to define role ranks for hierarchy
+const getRoleRank = (roleName) => {
+  const name = (roleName || '').toLowerCase().trim();
+  if (name === 'super admin') return 1;
+  if (name === 'admin') return 2;
+  if (name === 'sub admin') return 3;
+  return 10; // Default lower rank for all others
+};
+
 // Get all active users
 exports.getUsers = async (req, res) => {
   try {
+    const currentUserId = req.user ? req.user.id : 1;
+    
+    // Get the current user to find their rank
+    const currentUser = await prisma.user.findUnique({
+      where: { id: currentUserId },
+      include: { userTypeRole: true }
+    });
+
+    if (!currentUser) {
+      return sendError(res, 'Current user not found', 404);
+    }
+
+    const currentUserRank = getRoleRank(currentUser.userTypeRole?.userType);
+
     const users = await prisma.user.findMany({
       where: {
         isDelete: 0,
@@ -65,7 +88,13 @@ exports.getUsers = async (req, res) => {
       },
     });
 
-    const safeUsers = users.map(excludePassword);
+    // Filter based on rank (lower number = higher rank, so allowed if rank >= currentUserRank)
+    const filteredUsers = users.filter(user => {
+      const userRank = getRoleRank(user.userTypeRole?.userType);
+      return userRank >= currentUserRank;
+    });
+
+    const safeUsers = filteredUsers.map(excludePassword);
     return sendSuccess(res, 'Users retrieved successfully', safeUsers);
   } catch (error) {
     console.error('Get users error:', error);
@@ -77,6 +106,7 @@ exports.getUsers = async (req, res) => {
 exports.getUserById = async (req, res) => {
   try {
     const userId = parseInt(req.params.id);
+    const currentUserId = req.user ? req.user.id : 1;
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -85,6 +115,12 @@ exports.getUserById = async (req, res) => {
 
     if (!user || user.isDelete === 1) {
       return sendError(res, 'User not found', 404);
+    }
+
+    // Hierarchy Check
+    const currentUser = await prisma.user.findUnique({ where: { id: currentUserId }, include: { userTypeRole: true } });
+    if (getRoleRank(user.userTypeRole?.userType) < getRoleRank(currentUser?.userTypeRole?.userType)) {
+      return sendError(res, 'Unauthorized to view this user', 403);
     }
 
     return sendSuccess(res, 'User retrieved successfully', excludePassword(user));
@@ -101,9 +137,15 @@ exports.updateUser = async (req, res) => {
     const updateData = { ...req.body };
     const currentUserId = req.user ? req.user.id : 1;
 
-    const existingUser = await prisma.user.findUnique({ where: { id: userId } });
+    const existingUser = await prisma.user.findUnique({ where: { id: userId }, include: { userTypeRole: true } });
     if (!existingUser || existingUser.isDelete === 1) {
       return sendError(res, 'User not found', 404);
+    }
+
+    // Hierarchy Check
+    const currentUser = await prisma.user.findUnique({ where: { id: currentUserId }, include: { userTypeRole: true } });
+    if (getRoleRank(existingUser.userTypeRole?.userType) < getRoleRank(currentUser?.userTypeRole?.userType)) {
+      return sendError(res, 'Unauthorized to modify this user', 403);
     }
 
     // Handle email check
@@ -139,9 +181,15 @@ exports.deleteUser = async (req, res) => {
     const userId = parseInt(req.params.id);
     const currentUserId = req.user ? req.user.id : 1;
 
-    const existingUser = await prisma.user.findUnique({ where: { id: userId } });
+    const existingUser = await prisma.user.findUnique({ where: { id: userId }, include: { userTypeRole: true } });
     if (!existingUser || existingUser.isDelete === 1) {
       return sendError(res, 'User not found', 404);
+    }
+
+    // Hierarchy Check
+    const currentUser = await prisma.user.findUnique({ where: { id: currentUserId }, include: { userTypeRole: true } });
+    if (getRoleRank(existingUser.userTypeRole?.userType) < getRoleRank(currentUser?.userTypeRole?.userType)) {
+      return sendError(res, 'Unauthorized to delete this user', 403);
     }
 
     const user = await prisma.user.update({

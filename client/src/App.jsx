@@ -7,6 +7,9 @@ import UserList from './pages/UserList';
 import UserForm from './pages/UserForm';
 import MenuList from './pages/MenuList';
 import MenuForm from './pages/MenuForm';
+import UserTypeList from './pages/UserTypeList';
+import UserTypeForm from './pages/UserTypeForm';
+import RolePermissionForm from './pages/RolePermissionForm';
 
 function App() {
   return (
@@ -26,6 +29,13 @@ function App() {
           <Route path="menus" element={<MenuList />} />
           <Route path="menus/new" element={<MenuForm />} />
           <Route path="menus/edit/:id" element={<MenuForm />} />
+          
+          <Route path="user-types" element={<UserTypeList />} />
+          <Route path="user-types/new" element={<UserTypeForm />} />
+          <Route path="user-types/edit/:id" element={<UserTypeForm />} />
+          
+          <Route path="permissions" element={<RolePermissionForm />} />
+          <Route path="permissions/:userTypeId" element={<RolePermissionForm />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -3,23 +3,8 @@ import { Link, useLocation } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import api from '../utils/api';
 
-const Sidebar = ({ isOpen, toggleSidebar }) => {
+const Sidebar = ({ isOpen, toggleSidebar, menus = [] }) => {
   const location = useLocation();
-  const [navItems, setNavItems] = useState([]);
-
-  useEffect(() => {
-    const fetchMenus = async () => {
-      try {
-        const response = await api.get('/menus');
-        if (response.data.status) {
-          setNavItems(response.data.result);
-        }
-      } catch (error) {
-        console.error('Failed to fetch sidebar menus:', error);
-      }
-    };
-    fetchMenus();
-  }, []);
 
   const renderIcon = (iconName) => {
     const IconComponent = Icons[iconName] || Icons.Folder;
@@ -46,7 +31,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         {/* Navigation */}
         <nav className="flex-1 px-md py-lg overflow-y-auto space-y-2">
-          {navItems.filter(m => !m.parentId).map((item) => {
+          {menus.filter(m => !m.parentId).map((item) => {
             const path = item.listPageRoute || '#';
             const isActive = location.pathname === path || (location.pathname.startsWith(path) && path !== '/admin');
             

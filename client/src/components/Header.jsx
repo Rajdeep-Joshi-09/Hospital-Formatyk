@@ -2,25 +2,23 @@ import { Menu, LogOut, User } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../utils/api';
 
-const Header = ({ toggleSidebar }) => {
+const Header = ({ toggleSidebar, menus = [] }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
 
-  // Map pathnames to page titles
+  // Map pathnames to page titles dynamically using MenuMaster
   const getPageTitle = () => {
-    switch (location.pathname) {
-      case '/admin':
-        return 'Dashboard';
-      case '/admin/users':
-        return 'Manage Users';
-      case '/admin/analytics':
-        return 'Analytics';
-      case '/admin/settings':
-        return 'Settings';
-      default:
-        return 'Admin Panel';
-    }
+    if (location.pathname === '/admin') return 'Dashboard';
+    
+    // Find the menu whose listPageRoute or formPageRoute matches the current path
+    // We check exact match for listPageRoute, or prefix match for formPageRoute if editing
+    const currentMenu = menus.find(menu => {
+      if (!menu.listPageRoute) return false;
+      return location.pathname === menu.listPageRoute || location.pathname.startsWith(menu.listPageRoute + '/');
+    });
+
+    return currentMenu?.pageName || 'Admin Panel';
   };
 
   const handleLogout = async () => {
