@@ -127,3 +127,21 @@
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
 }
+
+/* Client page glassmorphism nav */
+.glass-nav {
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+}
+
+/* Reveal animation for scroll-triggered elements */
+.reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.8s cubic-bezier(0.21, 1.02, 0.73, 1);
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}

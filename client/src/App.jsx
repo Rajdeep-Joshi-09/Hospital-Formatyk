@@ -1,7 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import PublicLayout from './layouts/PublicLayout';
 import ProtectedLayout from './layouts/ProtectedLayout';
+import ClientLayout from './layouts/ClientLayout';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import UserList from './pages/UserList';
@@ -24,6 +25,16 @@ import SpecialitiesForm from './pages/SpecialitiesForm';
 import SubjectList from './pages/SubjectList';
 import SubjectForm from './pages/SubjectForm';
 
+// Client pages
+import HomePage from './pages/client/HomePage';
+import AboutPage from './pages/client/AboutPage';
+import ExpertsPage from './pages/client/ExpertsPage';
+import ExpertDetailPage from './pages/client/ExpertDetailPage';
+import SpecialitiesPage from './pages/client/SpecialitiesPage';
+import SpecialityDetailPage from './pages/client/SpecialityDetailPage';
+import ContactPage from './pages/client/ContactPage';
+import BookAppointmentPage from './pages/client/BookAppointmentPage';
+
 function App() {
   return (
     <BrowserRouter>
@@ -37,11 +48,24 @@ function App() {
         }}
       />
       <Routes>
+        {/* Client-facing public pages */}
+        <Route element={<ClientLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/experts" element={<ExpertsPage />} />
+          <Route path="/experts/:slug" element={<ExpertDetailPage />} />
+          <Route path="/specialities" element={<SpecialitiesPage />} />
+          <Route path="/specialities/:slug" element={<SpecialityDetailPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+          <Route path="/book-appointment" element={<BookAppointmentPage />} />
+        </Route>
+
+        {/* Login page */}
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<Login />} />
         </Route>
         
+        {/* Admin panel */}
         <Route path="/admin" element={<ProtectedLayout />}>
           <Route index element={<AdminDashboard />} />
           <Route path="users" element={<UserList />} />

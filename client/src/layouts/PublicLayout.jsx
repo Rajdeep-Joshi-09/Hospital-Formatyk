@@ -3,6 +3,7 @@ import { Outlet, Navigate } from 'react-router-dom';
 const PublicLayout = () => {
   const token = localStorage.getItem('accessToken');
 
+  // If logged in and visiting login, redirect to admin
   if (token) {
     return <Navigate to="/admin" replace />;
   }
