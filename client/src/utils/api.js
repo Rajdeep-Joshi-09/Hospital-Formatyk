@@ -29,8 +29,10 @@ api.interceptors.response.use(
       // Token is invalid, expired, or not present
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
-      // Redirect to login page
-      window.location.href = '/login';
+      // Redirect to login page only if not already there
+      if (window.location.pathname !== '/login' && window.location.pathname !== '/') {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

@@ -97,3 +97,16 @@ model ExpertiesMaster {
   deletedBy    Int?
   deletedDate  DateTime?
 }
+
+model LanguageMaster {
+  id           Int       @id @default(autoincrement())
+  lang         String    @db.VarChar
+  isStatus     Int       @default(1)
+  isDelete     Int       @default(0)
+  createdBy    Int
+  createdDate  DateTime  @default(now())
+  modifiedBy   Int?
+  modifiedDate DateTime? @updatedAt
+  deletedBy    Int?
+  deletedDate  DateTime?
+}

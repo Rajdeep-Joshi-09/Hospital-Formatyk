@@ -13,6 +13,8 @@ import UserTypeForm from './pages/UserTypeForm';
 import RolePermissionForm from './pages/RolePermissionForm';
 import ExpertiesList from './pages/ExpertiesList';
 import ExpertiesForm from './pages/ExpertiesForm';
+import LanguageList from './pages/LanguageList';
+import LanguageForm from './pages/LanguageForm';
 
 function App() {
   return (
@@ -49,6 +51,10 @@ function App() {
           <Route path="experties" element={<ExpertiesList />} />
           <Route path="experties/new" element={<ExpertiesForm />} />
           <Route path="experties/edit/:id" element={<ExpertiesForm />} />
+          
+          <Route path="languages" element={<LanguageList />} />
+          <Route path="languages/new" element={<LanguageForm />} />
+          <Route path="languages/edit/:id" element={<LanguageForm />} />
           
           <Route path="permissions" element={<RolePermissionForm />} />
           <Route path="permissions/:userTypeId" element={<RolePermissionForm />} />

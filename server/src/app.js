@@ -17,6 +17,7 @@ const menuRoutes = require('./routes/menuRoutes');
 const userTypeRoutes = require('./routes/userTypeRoutes');
 const rolePermissionRoutes = require('./routes/rolePermissionRoutes');
 const expertiesRoutes = require('./routes/expertiesRoutes');
+const languageRoutes = require('./routes/languageRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -24,6 +25,7 @@ app.use('/api/menus', menuRoutes);
 app.use('/api/user-types', userTypeRoutes);
 app.use('/api/permissions', rolePermissionRoutes);
 app.use('/api/experties', expertiesRoutes);
+app.use('/api/languages', languageRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
