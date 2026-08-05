@@ -49,12 +49,25 @@ const ProtectedLayout = () => {
     // Check if path matches any permitted menu
     return menus.some(menu => {
       if (!menu.listPageRoute) return false;
-      if (currentPath === menu.listPageRoute) return true;
-      if (currentPath.startsWith(menu.listPageRoute + '/')) return true;
+      if (currentPath === menu.listPageRoute) return true; // Has read access by definition
+      
+      if (currentPath.startsWith(menu.listPageRoute + '/')) {
+        if (currentPath.includes('/new')) {
+          return menu.userPermission?.isWrite === 1;
+        }
+        if (currentPath.includes('/edit')) {
+          return menu.userPermission?.isEdit === 1;
+        }
+        return true;
+      }
       
       if (menu.formPageRoute) {
-        if (currentPath === menu.formPageRoute) return true;
-        if (currentPath.startsWith(menu.formPageRoute + '/')) return true;
+        if (currentPath === menu.formPageRoute) {
+           return menu.userPermission?.isWrite === 1 || menu.userPermission?.isEdit === 1;
+        }
+        if (currentPath.startsWith(menu.formPageRoute + '/')) {
+           return menu.userPermission?.isEdit === 1;
+        }
       }
       return false;
     });
@@ -92,7 +105,7 @@ const ProtectedLayout = () => {
                 </p>
               </div>
             ) : (
-              <Outlet />
+              <Outlet context={{ menus }} />
             )}
           </div>
         </main>

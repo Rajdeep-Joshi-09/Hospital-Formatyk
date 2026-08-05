@@ -86,7 +86,10 @@ exports.getMyMenus = async (req, res) => {
         isRead: 1
       },
       select: {
-        menuId: true
+        menuId: true,
+        isWrite: true,
+        isEdit: true,
+        isDelete: true
       }
     });
 
@@ -107,7 +110,16 @@ exports.getMyMenus = async (req, res) => {
       ]
     });
 
-    return sendSuccess(res, 'My Menus retrieved successfully', menus);
+    // Attach permissions to menus
+    const menusWithPermissions = menus.map(menu => {
+      const perm = permissions.find(p => p.menuId === menu.id);
+      return {
+        ...menu,
+        userPermission: perm
+      };
+    });
+
+    return sendSuccess(res, 'My Menus retrieved successfully', menusWithPermissions);
   } catch (error) {
     console.error('Get my menus error:', error);
     return sendError(res, 'Server error while retrieving my menus');
