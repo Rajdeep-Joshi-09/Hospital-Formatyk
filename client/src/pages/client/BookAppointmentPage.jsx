@@ -1,17 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-
-const departments = [
-  'Internal Medicine',
-  'Neurosurgery',
-  'Pediatrics',
-  'Cardiology',
-  'Gastroenterology',
-  'Pulmonology',
-  'Orthopedics',
-];
+import api from '../../utils/api';
 
 const BookAppointmentPage = () => {
   const pageRef = useRef(null);
+  const [departments, setDepartments] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     department: '',
@@ -23,6 +16,20 @@ const BookAppointmentPage = () => {
     phone: '',
     notes: '',
   });
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await api.get('/public/specialities');
+        setDepartments(response.data.result.map(d => d.speciality));
+      } catch (error) {
+        console.error('Error fetching departments:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDepartments();
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(

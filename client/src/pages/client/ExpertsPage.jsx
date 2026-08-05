@@ -1,56 +1,36 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-
-const doctors = [
-  {
-    slug: 'dr-arthur-sterling',
-    name: 'Dr. Arthur Sterling',
-    specialty: 'Internal Medicine',
-    desc: 'Specializing in longevity science and complex diagnostic evaluations for executive health.',
-    exp: '25+ Years Exp',
-    rating: '5.0',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBR81ZOGtXgMF1OTJa49LzxZ9Omjv8ZFWhiZDUbysLEBMeWJlsgvElAurZ6AFXV_qhefVYTt5k-H73gvbTL00Yu1A-kNY4Bzw5cT6YTbihbNCJLy1i9n8E4XsPt8LrZna_LQzZ-lh1ocW_646cl832BiB06Yk7fvBVgGqzNhXRcBvEIFh6ybJYeTYX0HCba-N9WcRmjl8zcxj7C66IISWKGTGZkAh30I31rxlFaxCeE5XeI8JHkdEXkNA',
-  },
-  {
-    slug: 'dr-elena-vance',
-    name: 'Dr. Elena Vance',
-    specialty: 'Neurosurgery',
-    desc: 'A pioneer in minimally invasive cranial procedures and neuro-regenerative therapies.',
-    exp: '18+ Years Exp',
-    rating: '5.0',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDFImE0TqudKxB7W5z0a2Ks8jFjrx2kPzh-43tuJNyAjTEjJAM5KgX1sNAiDpLzQzrTNOlXrWNBTY9s3t081bF8IxDkYBopQQgh2l1-0j27FJ57L6MfXnYihYG8SJF2BrYbSry3Pve0nrIkxxd2UmxS7Cvcu7f1VS5tvj2tSF7k6GlpZtXy5_IkhSmQPANSG9r460ZlfoMUebvOyJuAya1_-h3aMxnXQ-sAM1MSwBQvPRAX9UpqbQuJyg',
-  },
-  {
-    slug: 'dr-sarah-chen',
-    name: 'Dr. Sarah Chen',
-    specialty: 'Pediatrics',
-    desc: 'Focused on holistic child development and integrated wellness for the next generation.',
-    exp: '12+ Years Exp',
-    rating: '5.0',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAl1z4En7sJZEvKSFc_vEUFqjacQgF7RTzFZIGZaWWTLw9QIc8CccOcUWmh3p96Q2eeGk-Jy4buR3MKG562OF7HbACaYJ8vh5FFs5-jH-AmqKmTbVXucapVgd3A9F43mCCSoPosSMfnniB3nMm93lSsl94QnigSlV25UNX4C1BF8IGCoFHMnq4ey-2nLoMS3SVD4R9vCVNR3wN0ZJoNl89E0nSMJM4VwZBJR9m73LEK0vcOuXUekTtiGQ',
-  },
-  {
-    slug: 'dr-julian-rossi',
-    name: 'Dr. Julian Rossi',
-    specialty: 'Cardiology',
-    desc: 'Expert in preventive cardiology and precision heart health utilizing advanced AI imaging.',
-    exp: '15+ Years Exp',
-    rating: '4.9',
-    img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA_dw-_OlrKH2_1NhnXrYMF5-zlM-XJJzcub4qCFynw_RJW2TekLyf37U07W3leaULNwpukFhxw0X1irCOyA6wF-dOSO9EWKbc-geiWm2mhy1ShcfmGkh92qr8w_Ru-TjeDzcCfIg2VXvnkej9OgR1Oo7gSeIoOrsOYD6blk9_wa4oifyMqUuq2BPPB2L5XSbEzxJp_TYR_f_xVc7HGbCFlir2v6ihwrTWoiLVisnMqmHKPDfAoOnvYew',
-  },
-];
+import api from '../../utils/api';
 
 const ExpertsPage = () => {
   const pageRef = useRef(null);
+  const [doctors, setDoctors] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const response = await api.get('/public/doctors');
+        setDoctors(response.data.result || []);
+      } catch (error) {
+        console.error('Error fetching doctors:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDoctors();
+  }, []);
+
+  useEffect(() => {
+    if (loading) return;
     const observer = new IntersectionObserver(
       (entries) => entries.forEach((e) => e.isIntersecting && e.target.classList.add('active')),
       { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
     );
-    pageRef.current?.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+    const elements = pageRef.current?.querySelectorAll('.reveal');
+    elements?.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, []);
+  }, [loading]);
 
   return (
     <div ref={pageRef}>
@@ -66,39 +46,55 @@ const ExpertsPage = () => {
       </section>
 
       {/* Doctors Grid Section */}
-      <section className="py-8 px-6 mb-20">
+      <section className="py-8 px-6 mb-20 min-h-[400px]">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {doctors.map((doc, i) => (
-              <div
-                key={doc.slug}
-                className="reveal group bg-white rounded-[24px] border border-[#E7E7E7] overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0px_20px_40px_rgba(0,0,0,0.06)]"
-                style={{ transitionDelay: `${i * 100}ms` }}
-              >
-                <div className="relative h-[300px] sm:h-[400px] overflow-hidden">
-                  <img alt={doc.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.08]" src={doc.img} />
-                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                    <span className="material-symbols-outlined text-yellow-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                    <span className="font-['Inter'] text-[14px] font-semibold text-[#251817]">{doc.rating}</span>
+          {loading ? (
+            <div className="flex justify-center items-center h-48">
+              <span className="material-symbols-outlined animate-spin text-[#ac2b2e] text-4xl">autorenew</span>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {doctors.map((doc, i) => (
+                <div
+                  key={doc.id}
+                  className="reveal group bg-white rounded-[24px] border border-[#E7E7E7] overflow-hidden transition-all duration-500 hover:-translate-y-2 hover:shadow-[0px_20px_40px_rgba(0,0,0,0.06)]"
+                  style={{ transitionDelay: `${(i % 4) * 100}ms` }}
+                >
+                  <div className="relative h-[300px] sm:h-[400px] overflow-hidden bg-gray-100">
+                    {doc.image ? (
+                      <img alt={doc.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.08]" src={doc.image} />
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-[#ac2b2e]/20 transition-transform duration-700 group-hover:scale-[1.08]">
+                        <span className="material-symbols-outlined" style={{ fontSize: '120px' }}>medical_services</span>
+                      </div>
+                    )}
+                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+                      <span className="material-symbols-outlined text-yellow-500 text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                      <span className="font-['Inter'] text-[14px] font-semibold text-[#251817]">5.0</span>
+                    </div>
+                    {doc.yearOfExp && (
+                      <div className="absolute bottom-4 left-4">
+                        <span className="bg-[#ac2b2e]/90 backdrop-blur-md text-white text-[12px] px-3 py-1 rounded-full font-['Inter'] font-semibold uppercase tracking-wider">{doc.yearOfExp}+ Years Exp</span>
+                      </div>
+                    )}
                   </div>
-                  <div className="absolute bottom-4 left-4">
-                    <span className="bg-[#ac2b2e]/90 backdrop-blur-md text-white text-[12px] px-3 py-1 rounded-full font-['Inter'] font-semibold uppercase tracking-wider">{doc.exp}</span>
+                  <div className="p-8">
+                    <span className="text-[#ac2b2e] font-['Inter'] text-[11px] font-semibold uppercase tracking-widest mb-1 block line-clamp-1">
+                      {doc.expertiesMaster?.expertyType || 'General Medicine'}
+                    </span>
+                    <h3 className="font-['Playfair_Display'] text-[24px] font-semibold text-[#251817] mb-2">{doc.name}</h3>
+                    <p className="font-['Inter'] text-[16px] text-[#59413f] line-clamp-2 mb-4 opacity-70">{doc.description}</p>
+                    <Link
+                      to={`/experts/${doc.id}`}
+                      className="block w-full bg-[#D74A49] text-white py-3 rounded-xl font-['Inter'] text-[14px] font-semibold text-center transition-all hover:bg-[#ac2b2e] active:scale-95"
+                    >
+                      View Details
+                    </Link>
                   </div>
                 </div>
-                <div className="p-8">
-                  <span className="text-[#ac2b2e] font-['Inter'] text-[11px] font-semibold uppercase tracking-widest mb-1 block">{doc.specialty}</span>
-                  <h3 className="font-['Playfair_Display'] text-[24px] font-semibold text-[#251817] mb-2">{doc.name}</h3>
-                  <p className="font-['Inter'] text-[16px] text-[#59413f] line-clamp-2 mb-4 opacity-70">{doc.desc}</p>
-                  <Link
-                    to={`/experts/${doc.slug}`}
-                    className="block w-full bg-[#D74A49] text-white py-3 rounded-xl font-['Inter'] text-[14px] font-semibold text-center transition-all hover:bg-[#ac2b2e] active:scale-95"
-                  >
-                    View Details
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 

@@ -53,9 +53,9 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/experts" element={<ExpertsPage />} />
-          <Route path="/experts/:slug" element={<ExpertDetailPage />} />
+          <Route path="/experts/:id" element={<ExpertDetailPage />} />
           <Route path="/specialities" element={<SpecialitiesPage />} />
-          <Route path="/specialities/:slug" element={<SpecialityDetailPage />} />
+          <Route path="/specialities/:id" element={<SpecialityDetailPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/book-appointment" element={<BookAppointmentPage />} />
         </Route>
