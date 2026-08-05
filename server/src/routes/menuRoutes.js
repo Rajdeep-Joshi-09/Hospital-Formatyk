@@ -10,6 +10,7 @@ router.use(authenticateToken);
 
 // Routes
 router.post('/', validate(createMenuSchema), menuController.createMenu);
+router.get('/my-menus', menuController.getMyMenus);
 router.get('/', menuController.getMenus);
 router.get('/:id', menuController.getMenuById);
 router.put('/:id', validate(updateMenuSchema), menuController.updateMenu);

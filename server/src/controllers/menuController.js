@@ -65,6 +65,67 @@ exports.getMenus = async (req, res) => {
   }
 };
 
+exports.getMyMenus = async (req, res) => {
+  try {
+    const currentUserId = req.user ? req.user.id : 1;
+    
+    // Get the user's role
+    const user = await prisma.user.findUnique({
+      where: { id: currentUserId },
+      select: { userType: true }
+    });
+    
+    if (!user) {
+      return sendError(res, 'User not found', 404);
+    }
+
+    // Get the permissions for this role where isRead is 1
+    const permissions = await prisma.rolePermission.findMany({
+      where: {
+        userTypeId: user.userType,
+        isRead: 1
+      },
+      select: {
+        menuId: true,
+        isWrite: true,
+        isEdit: true,
+        isDelete: true
+      }
+    });
+
+    const allowedMenuIds = permissions.map(p => p.menuId);
+
+    // Fetch only the allowed menus
+    const menus = await prisma.menu.findMany({
+      where: {
+        isDelete: 0,
+        id: { in: allowedMenuIds }
+      },
+      include: {
+        parent: true,
+      },
+      orderBy: [
+        { sortOrder: 'asc' },
+        { id: 'desc' }
+      ]
+    });
+
+    // Attach permissions to menus
+    const menusWithPermissions = menus.map(menu => {
+      const perm = permissions.find(p => p.menuId === menu.id);
+      return {
+        ...menu,
+        userPermission: perm
+      };
+    });
+
+    return sendSuccess(res, 'My Menus retrieved successfully', menusWithPermissions);
+  } catch (error) {
+    console.error('Get my menus error:', error);
+    return sendError(res, 'Server error while retrieving my menus');
+  }
+};
+
 exports.getMenuById = async (req, res) => {
   try {
     const menuId = parseInt(req.params.id);

@@ -32,7 +32,7 @@ const MenuForm = () => {
   // Get all valid icon names from lucide-react
   const availableIcons = useMemo(() => {
     return Object.keys(Icons).filter(name => 
-      typeof Icons[name] === 'function' && !name.endsWith('Icon') && name !== 'createLucideIcon'
+      /^[A-Z]/.test(name) && !name.endsWith('Icon')
     );
   }, []);
 
@@ -251,32 +251,44 @@ const MenuForm = () => {
               </label>
             </div>
 
-            <div className="relative w-full flex flex-col gap-xs">
-              <label className="text-caption font-label-md text-on-surface-variant pl-sm">Parent Menu</label>
+            <div className="relative w-full">
               <select
+                id="parentId"
                 name="parentId"
                 value={formData.parentId}
                 onChange={handleChange}
-                className="w-full bg-surface-container-lowest border border-[#E7E7E7] rounded-lg px-md py-[14px] text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
+                className="peer w-full bg-surface-container-lowest border border-[#E7E7E7] rounded-lg px-md pt-lg pb-sm text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none cursor-pointer h-[58px]"
               >
                 <option value="">None (Root Level)</option>
                 {availableMenus.map(menu => (
                   <option key={menu.id} value={menu.id}>{menu.menuName}</option>
                 ))}
               </select>
+              <label htmlFor="parentId" className="absolute left-md top-[10px] text-label-md text-on-surface-variant scale-85 transition-all duration-200 pointer-events-none origin-left font-body-md peer-focus:text-primary whitespace-nowrap">
+                Parent Menu
+              </label>
+              <div className="absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
             </div>
 
-            <div className="relative w-full flex flex-col gap-xs">
-              <label className="text-caption font-label-md text-on-surface-variant pl-sm">Status</label>
+            <div className="relative w-full">
               <select
+                id="isStatus"
                 name="isStatus"
                 value={formData.isStatus}
                 onChange={handleChange}
-                className="w-full bg-surface-container-lowest border border-[#E7E7E7] rounded-lg px-md py-[14px] text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
+                className="peer w-full bg-surface-container-lowest border border-[#E7E7E7] rounded-lg px-md pt-lg pb-sm text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none cursor-pointer h-[58px]"
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
               </select>
+              <label htmlFor="isStatus" className="absolute left-md top-[10px] text-label-md text-on-surface-variant scale-85 transition-all duration-200 pointer-events-none origin-left font-body-md peer-focus:text-primary whitespace-nowrap">
+                Status
+              </label>
+              <div className="absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
             </div>
 
           </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useOutletContext, useLocation } from 'react-router-dom';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import api from '../utils/api';
 import DataTable from '../components/DataTable';
@@ -7,6 +7,11 @@ import DataTable from '../components/DataTable';
 const MenuList = () => {
   const [menus, setMenus] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  const { menus: layoutMenus } = useOutletContext();
+  const location = useLocation();
+  const currentMenu = layoutMenus.find(m => m.listPageRoute === location.pathname) || {};
+  const permissions = currentMenu.userPermission || { isWrite: 0, isEdit: 0, isDelete: 0 };
 
   const fetchMenus = async () => {
     try {
@@ -62,12 +67,16 @@ const MenuList = () => {
       sortable: false,
       render: (row) => (
         <div className="flex gap-sm">
-          <Link to={`/admin/menus/edit/${row.id}`} className="p-xs text-primary hover:bg-surface-container rounded transition-colors">
-            <Edit size={18} />
-          </Link>
-          <button onClick={() => handleDelete(row.id)} className="p-xs text-error hover:bg-error-container rounded transition-colors">
-            <Trash2 size={18} />
-          </button>
+          {permissions.isEdit === 1 && (
+            <Link to={`/admin/menus/edit/${row.id}`} className="p-xs text-primary hover:bg-surface-container rounded transition-colors">
+              <Edit size={18} />
+            </Link>
+          )}
+          {permissions.isDelete === 1 && (
+            <button onClick={() => handleDelete(row.id)} className="p-xs text-error hover:bg-error-container rounded transition-colors">
+              <Trash2 size={18} />
+            </button>
+          )}
         </div>
       )
     }
@@ -84,13 +93,15 @@ const MenuList = () => {
           <h2 className="font-headline-md text-headline-md text-on-surface">Manage Menus</h2>
           <p className="font-body-md text-on-surface-variant mt-xs">View, search, and manage application navigation menus.</p>
         </div>
-        <Link 
-          to="/admin/menus/new" 
-          className="flex items-center gap-xs bg-primary text-on-primary hover:bg-primary-container px-md py-sm rounded-lg font-label-md transition-colors shadow-sm"
-        >
-          <Plus size={20} />
-          Add Menu
-        </Link>
+        {permissions.isWrite === 1 && (
+          <Link 
+            to="/admin/menus/new" 
+            className="flex items-center gap-xs bg-primary text-on-primary hover:bg-primary-container px-md py-sm rounded-lg font-label-md transition-colors shadow-sm"
+          >
+            <Plus size={20} />
+            Add Menu
+          </Link>
+        )}
       </div>
 
       <div className="flex-1 overflow-hidden">

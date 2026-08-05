@@ -16,14 +16,25 @@ const UserForm = () => {
     userType: 1,
     isStatus: 1
   });
-  const [loading, setLoading] = useState(isEditMode);
+  const [userTypes, setUserTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (isEditMode) {
-      const fetchUser = async () => {
-        try {
+    const fetchInitialData = async () => {
+      try {
+        // Fetch user types for dropdown
+        const utResponse = await api.get('/user-types');
+        if (utResponse.data.status) {
+          setUserTypes(utResponse.data.result);
+          // Set default user type if not in edit mode
+          if (!isEditMode && utResponse.data.result.length > 0) {
+             setFormData(prev => ({...prev, userType: utResponse.data.result[0].id}));
+          }
+        }
+
+        if (isEditMode) {
           const response = await api.get(`/users/${id}`);
           if (response.data.status) {
             const user = response.data.result;
@@ -36,15 +47,16 @@ const UserForm = () => {
               isStatus: user.isStatus
             });
           }
-        } catch (err) {
-          setError('Failed to load user data');
-          console.error(err);
-        } finally {
-          setLoading(false);
         }
-      };
-      fetchUser();
-    }
+      } catch (err) {
+        setError('Failed to load required data');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchInitialData();
   }, [id, isEditMode]);
 
   const handleChange = (e) => {
@@ -174,31 +186,45 @@ const UserForm = () => {
             </div>
 
             {/* User Type */}
-            <div className="relative w-full flex flex-col gap-xs">
-              <label className="text-caption font-label-md text-on-surface-variant pl-sm">Role</label>
+            <div className="relative w-full">
               <select
+                id="userType"
                 name="userType"
                 value={formData.userType}
                 onChange={handleChange}
-                className="w-full bg-surface-container-lowest border border-[#E7E7E7] rounded-lg px-md py-[14px] text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
+                className="peer w-full bg-surface-container-lowest border border-[#E7E7E7] rounded-lg px-md pt-lg pb-sm text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none cursor-pointer h-[58px]"
               >
-                <option value={1}>Admin</option>
-                <option value={2}>Staff</option>
+                {userTypes.map(ut => (
+                  <option key={ut.id} value={ut.id}>
+                    {ut.userType}
+                  </option>
+                ))}
               </select>
+              <label htmlFor="userType" className="absolute left-md top-[10px] text-label-md text-on-surface-variant scale-85 transition-all duration-200 pointer-events-none origin-left font-body-md peer-focus:text-primary whitespace-nowrap">
+                Role
+              </label>
+              <div className="absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
             </div>
 
-            {/* Status */}
-            <div className="relative w-full flex flex-col gap-xs">
-              <label className="text-caption font-label-md text-on-surface-variant pl-sm">Status</label>
+            <div className="relative w-full">
               <select
+                id="isStatus"
                 name="isStatus"
                 value={formData.isStatus}
                 onChange={handleChange}
-                className="w-full bg-surface-container-lowest border border-[#E7E7E7] rounded-lg px-md py-[14px] text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
+                className="peer w-full bg-surface-container-lowest border border-[#E7E7E7] rounded-lg px-md pt-lg pb-sm text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none cursor-pointer h-[58px]"
               >
                 <option value={1}>Active</option>
                 <option value={0}>Inactive</option>
               </select>
+              <label htmlFor="isStatus" className="absolute left-md top-[10px] text-label-md text-on-surface-variant scale-85 transition-all duration-200 pointer-events-none origin-left font-body-md peer-focus:text-primary whitespace-nowrap">
+                Status
+              </label>
+              <div className="absolute right-md top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+              </div>
             </div>
 
           </div>
