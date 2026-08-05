@@ -17,20 +17,21 @@ model UserTypeMaster {
   modifiedDate DateTime? @updatedAt
   deletedBy    Int?
   deletedDate  DateTime?
-  users        User[]
-  permissions  RolePermission[]
+
+  users       User[]
+  permissions RolePermission[]
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
-  name        String
-  email       String    @unique
-  phone       String
-  password    String
-  
-  userType    Int
+  id       Int    @id @default(autoincrement())
+  name     String
+  email    String @unique
+  phone    String
+  password String
+
+  userType     Int
   userTypeRole UserTypeMaster @relation(fields: [userType], references: [id])
-  
+
   isStatus    Int       @default(1)
   isDelete    Int       @default(0)
   createdBy   Int
@@ -42,46 +43,47 @@ model User {
 }
 
 model Menu {
-  id            Int       @id @default(autoincrement())
+  id            Int     @id @default(autoincrement())
   menuName      String
   pageName      String?
   formPageRoute String?
   listPageRoute String?
-  sortOrder     Int       @default(0)
+  sortOrder     Int     @default(0)
   icon          String?
-  
-  parentId      Int?
-  parent        Menu?     @relation("MenuHierarchy", fields: [parentId], references: [id])
-  submenus      Menu[]    @relation("MenuHierarchy")
 
-  isStatus      Int       @default(1)
-  isDelete      Int       @default(0)
-  createdBy     Int
-  createdAt     DateTime  @default(now())
-  updatedBy     Int
-  updatedDate   DateTime  @updatedAt
-  deletedBy     Int       @default(0)
-  deletedDate   DateTime?
-  permissions   RolePermission[]
+  parentId Int?
+  parent   Menu?  @relation("MenuHierarchy", fields: [parentId], references: [id])
+  submenus Menu[] @relation("MenuHierarchy")
+
+  isStatus    Int       @default(1)
+  isDelete    Int       @default(0)
+  createdBy   Int
+  createdAt   DateTime  @default(now())
+  updatedBy   Int
+  updatedDate DateTime  @updatedAt
+  deletedBy   Int       @default(0)
+  deletedDate DateTime?
+
+  permissions RolePermission[]
 }
 
 model RolePermission {
-  id           Int       @id @default(autoincrement())
-  userTypeId   Int
-  menuId       Int
-  isRead       Int       @default(0)
-  isWrite      Int       @default(0)
-  isEdit       Int       @default(0)
-  isDelete     Int       @default(0)
+  id         Int @id @default(autoincrement())
+  userTypeId Int
+  menuId     Int
+  isRead     Int @default(0)
+  isWrite    Int @default(0)
+  isEdit     Int @default(0)
+  isDelete   Int @default(0)
 
-  userType     UserTypeMaster @relation(fields: [userTypeId], references: [id])
-  menu         Menu           @relation(fields: [menuId], references: [id])
+  userType UserTypeMaster @relation(fields: [userTypeId], references: [id])
+  menu     Menu           @relation(fields: [menuId], references: [id])
 
-  createdBy    Int
-  createdAt    DateTime  @default(now())
-  updatedBy    Int?
-  updatedDate  DateTime? @updatedAt
-  
+  createdBy   Int
+  createdAt   DateTime  @default(now())
+  updatedBy   Int?
+  updatedDate DateTime? @updatedAt
+
   @@unique([userTypeId, menuId])
 }
 
@@ -96,6 +98,7 @@ model ExpertiesMaster {
   modifiedDate DateTime? @updatedAt
   deletedBy    Int?
   deletedDate  DateTime?
+  doctors      Doctor[]
 }
 
 model LanguageMaster {
@@ -109,4 +112,27 @@ model LanguageMaster {
   modifiedDate DateTime? @updatedAt
   deletedBy    Int?
   deletedDate  DateTime?
+  doctors      Doctor[]
+}
+
+model Doctor {
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar
+  image        String?   @db.VarChar
+  experties    Int
+  description  String?   @db.VarChar
+  yearOfExp    Int?
+  education    String?   @db.VarChar
+  languages    Int
+  isStatus     Int       @default(1)
+  isDelete     Int       @default(0)
+  createdBy    Int
+  createdDate  DateTime  @default(now())
+  modifiedBy   Int?
+  modifiedDate DateTime? @updatedAt
+  deletedBy    Int?
+  deletedDate  DateTime?
+
+  expertiesMaster ExpertiesMaster @relation(fields: [experties], references: [id])
+  languageMaster  LanguageMaster  @relation(fields: [languages], references: [id])
 }

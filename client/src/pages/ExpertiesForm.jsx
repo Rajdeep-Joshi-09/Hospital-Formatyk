@@ -41,10 +41,17 @@ const ExpertiesForm = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (checked ? 1 : 0) : value
-    }));
+    if (name === 'isStatus') {
+      setFormData(prev => ({
+        ...prev,
+        [name]: parseInt(value)
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? (checked ? 1 : 0) : value
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {

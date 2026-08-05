@@ -18,6 +18,7 @@ const userTypeRoutes = require('./routes/userTypeRoutes');
 const rolePermissionRoutes = require('./routes/rolePermissionRoutes');
 const expertiesRoutes = require('./routes/expertiesRoutes');
 const languageRoutes = require('./routes/languageRoutes');
+const doctorRoutes = require('./routes/doctorRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -26,6 +27,7 @@ app.use('/api/user-types', userTypeRoutes);
 app.use('/api/permissions', rolePermissionRoutes);
 app.use('/api/experties', expertiesRoutes);
 app.use('/api/languages', languageRoutes);
+app.use('/api/doctors', doctorRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
