@@ -138,8 +138,26 @@ model Doctor {
 }
 
 model TreatmentTypeMaster {
+  id           Int            @id @default(autoincrement())
+  treatType    String         @db.VarChar
+  isStatus     Int            @default(1)
+  isDelete     Int            @default(0)
+  createdBy    Int
+  createdDate  DateTime       @default(now())
+  modifiedBy   Int?
+  modifiedDate DateTime?      @updatedAt
+  deletedBy    Int?
+  deletedDate  DateTime?
+  specialities Specialities[]
+}
+
+model Specialities {
   id           Int       @id @default(autoincrement())
-  treatType    String    @db.VarChar
+  speciality   String    @db.VarChar
+  description  String?   @db.VarChar
+  experience   Int?
+  icon         String?   @db.VarChar
+  treatType    Int
   isStatus     Int       @default(1)
   isDelete     Int       @default(0)
   createdBy    Int
@@ -148,4 +166,6 @@ model TreatmentTypeMaster {
   modifiedDate DateTime? @updatedAt
   deletedBy    Int?
   deletedDate  DateTime?
+
+  treatmentType TreatmentTypeMaster @relation(fields: [treatType], references: [id])
 }
