@@ -46,8 +46,8 @@ const UserList = () => {
       key: 'userType',
       label: 'Role',
       render: (row) => (
-        <span className="px-sm py-xs bg-surface-container rounded-lg font-label-md">
-          {row.userType === 1 ? 'Admin' : 'Staff'}
+        <span className="px-sm py-xs bg-surface-container rounded-lg font-label-md text-on-surface-variant">
+          {row.userTypeRole ? row.userTypeRole.userType : 'Unknown'}
         </span>
       )
     },

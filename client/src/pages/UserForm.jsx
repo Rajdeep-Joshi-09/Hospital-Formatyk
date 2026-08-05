@@ -16,14 +16,25 @@ const UserForm = () => {
     userType: 1,
     isStatus: 1
   });
-  const [loading, setLoading] = useState(isEditMode);
+  const [userTypes, setUserTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (isEditMode) {
-      const fetchUser = async () => {
-        try {
+    const fetchInitialData = async () => {
+      try {
+        // Fetch user types for dropdown
+        const utResponse = await api.get('/user-types');
+        if (utResponse.data.status) {
+          setUserTypes(utResponse.data.result);
+          // Set default user type if not in edit mode
+          if (!isEditMode && utResponse.data.result.length > 0) {
+             setFormData(prev => ({...prev, userType: utResponse.data.result[0].id}));
+          }
+        }
+
+        if (isEditMode) {
           const response = await api.get(`/users/${id}`);
           if (response.data.status) {
             const user = response.data.result;
@@ -36,15 +47,16 @@ const UserForm = () => {
               isStatus: user.isStatus
             });
           }
-        } catch (err) {
-          setError('Failed to load user data');
-          console.error(err);
-        } finally {
-          setLoading(false);
         }
-      };
-      fetchUser();
-    }
+      } catch (err) {
+        setError('Failed to load required data');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchInitialData();
   }, [id, isEditMode]);
 
   const handleChange = (e) => {
@@ -182,8 +194,11 @@ const UserForm = () => {
                 onChange={handleChange}
                 className="w-full bg-surface-container-lowest border border-[#E7E7E7] rounded-lg px-md py-[14px] text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
               >
-                <option value={1}>Admin</option>
-                <option value={2}>Staff</option>
+                {userTypes.map(ut => (
+                  <option key={ut.id} value={ut.id}>
+                    {ut.userType}
+                  </option>
+                ))}
               </select>
             </div>
 

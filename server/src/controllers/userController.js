@@ -57,6 +57,9 @@ exports.getUsers = async (req, res) => {
       where: {
         isDelete: 0,
       },
+      include: {
+        userTypeRole: true,
+      },
       orderBy: {
         id: 'desc',
       },
@@ -77,6 +80,7 @@ exports.getUserById = async (req, res) => {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
+      include: { userTypeRole: true },
     });
 
     if (!user || user.isDelete === 1) {

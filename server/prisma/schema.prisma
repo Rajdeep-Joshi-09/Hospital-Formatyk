@@ -6,13 +6,30 @@ datasource db {
   provider = "postgresql"
 }
 
+model UserTypeMaster {
+  id           Int       @id @default(autoincrement())
+  userType     String    @db.VarChar
+  isStatus     Int       @default(1)
+  isDelete     Int       @default(0)
+  createdBy    Int
+  createdDate  DateTime  @default(now())
+  modifiedBy   Int?
+  modifiedDate DateTime? @updatedAt
+  deletedBy    Int?
+  deletedDate  DateTime?
+  users        User[]
+}
+
 model User {
   id          Int       @id @default(autoincrement())
   name        String
   email       String    @unique
   phone       String
   password    String
+  
   userType    Int
+  userTypeRole UserTypeMaster @relation(fields: [userType], references: [id])
+  
   isStatus    Int       @default(1)
   isDelete    Int       @default(0)
   createdBy   Int

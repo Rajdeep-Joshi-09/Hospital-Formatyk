@@ -32,7 +32,7 @@ const MenuForm = () => {
   // Get all valid icon names from lucide-react
   const availableIcons = useMemo(() => {
     return Object.keys(Icons).filter(name => 
-      typeof Icons[name] === 'function' && !name.endsWith('Icon') && name !== 'createLucideIcon'
+      /^[A-Z]/.test(name) && !name.endsWith('Icon')
     );
   }, []);
 
