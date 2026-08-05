@@ -5,47 +5,48 @@ import toast from 'react-hot-toast';
 import api from '../utils/api';
 import DataTable from '../components/DataTable';
 
-const UserList = () => {
-  const [users, setUsers] = useState([]);
+const ExpertiesList = () => {
+  const [experties, setExperties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { menus } = useOutletContext();
+  
+  const { menus: layoutMenus } = useOutletContext();
   const location = useLocation();
-  const currentMenu = menus.find(m => m.listPageRoute === location.pathname) || {};
+  const currentMenu = layoutMenus.find(m => m.listPageRoute === location.pathname) || {};
   const permissions = currentMenu.userPermission || { isWrite: 0, isEdit: 0, isDelete: 0 };
 
-  const fetchUsers = async () => {
+  const fetchExperties = async () => {
     try {
-      const response = await api.get('/users');
+      const response = await api.get('/experties');
       if (response.data.status) {
-        setUsers(response.data.result);
+        setExperties(response.data.result);
       }
     } catch (error) {
-      console.error('Failed to fetch users', error);
+      console.error('Failed to fetch experties', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchUsers();
+    fetchExperties();
   }, []);
 
   const handleDelete = (id) => {
     toast((t) => (
       <div className="flex flex-col gap-xs">
-        <p className="font-body-md m-0">Are you sure you want to delete this user?</p>
+        <p className="font-body-md m-0">Are you sure you want to delete this?</p>
         <div className="flex gap-sm justify-end mt-2">
           <button 
             className="px-md py-xs bg-error text-on-error rounded-md text-sm font-label-md"
             onClick={async () => {
               toast.dismiss(t.id);
               try {
-                await api.delete(`/users/${id}`);
-                fetchUsers();
+                await api.delete(`/experties/${id}`);
+                fetchExperties();
                 toast.success('Deleted successfully');
               } catch (error) {
-                console.error('Failed to delete user', error);
-                toast.error(error.response?.data?.message || 'Error deleting user');
+                console.error('Failed to delete experties', error);
+                toast.error(error.response?.data?.message || 'Error deleting experties');
               }
             }}
           >
@@ -64,20 +65,9 @@ const UserList = () => {
 
   const columns = [
     { key: 'id', label: 'ID' },
-    { key: 'name', label: 'Name' },
-    { key: 'email', label: 'Email Address' },
-    { key: 'phone', label: 'Phone Number' },
-    {
-      key: 'userType',
-      label: 'Role',
-      render: (row) => (
-        <span className="px-sm py-xs bg-surface-container rounded-lg font-label-md text-on-surface-variant">
-          {row.userTypeRole ? row.userTypeRole.userType : 'Unknown'}
-        </span>
-      )
-    },
-    {
-      key: 'isStatus',
+    { key: 'expertyType', label: 'Experties Type' },
+    { 
+      key: 'isStatus', 
       label: 'Status',
       render: (row) => (
         <span className={`px-sm py-xs rounded-lg font-label-md ${row.isStatus === 1 ? 'bg-[#E0F2E9] text-[#1D7A46]' : 'bg-error-container text-on-error-container'}`}>
@@ -92,7 +82,7 @@ const UserList = () => {
       render: (row) => (
         <div className="flex gap-sm">
           {permissions.isEdit === 1 && (
-            <Link to={`/admin/users/edit/${row.id}`} className="p-xs text-primary hover:bg-surface-container rounded transition-colors">
+            <Link to={`/admin/experties/edit/${row.id}`} className="p-xs text-primary hover:bg-surface-container rounded transition-colors">
               <Edit size={18} />
             </Link>
           )}
@@ -107,32 +97,32 @@ const UserList = () => {
   ];
 
   if (loading) {
-    return <div className="p-xl text-center font-body-md">Loading users...</div>;
+    return <div className="p-xl text-center font-body-md">Loading experties...</div>;
   }
 
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex justify-between items-center mb-lg">
         <div>
-          <h2 className="font-headline-md text-headline-md text-on-surface">Manage Users</h2>
-          <p className="font-body-md text-on-surface-variant mt-xs">View, search, and export system users.</p>
+          <h2 className="font-headline-md text-headline-md text-on-surface">Manage Experties</h2>
+          <p className="font-body-md text-on-surface-variant mt-xs">View, search, and manage experties.</p>
         </div>
         {permissions.isWrite === 1 && (
-          <Link
-            to="/admin/users/new"
+          <Link 
+            to="/admin/experties/new" 
             className="flex items-center gap-xs bg-primary text-on-primary hover:bg-primary-container px-md py-sm rounded-lg font-label-md transition-colors shadow-sm"
           >
             <Plus size={20} />
-            Add User
+            Add Experties
           </Link>
         )}
       </div>
 
       <div className="flex-1 overflow-hidden">
-        <DataTable columns={columns} data={users} exportFileName="LuxCare_Users" />
+        <DataTable columns={columns} data={experties} exportFileName="LuxCare_Experties" />
       </div>
     </div>
   );
 };
 
-export default UserList;
+export default ExpertiesList;

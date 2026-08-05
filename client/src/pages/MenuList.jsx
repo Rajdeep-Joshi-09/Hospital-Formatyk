@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useOutletContext, useLocation } from 'react-router-dom';
 import { Plus, Edit, Trash2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import api from '../utils/api';
 import DataTable from '../components/DataTable';
 
@@ -30,16 +31,36 @@ const MenuList = () => {
     fetchMenus();
   }, []);
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this menu?')) {
-      try {
-        await api.delete(`/menus/${id}`);
-        fetchMenus(); // Refresh list
-      } catch (error) {
-        console.error('Failed to delete menu', error);
-        alert(error.response?.data?.message || 'Error deleting menu');
-      }
-    }
+  const handleDelete = (id) => {
+    toast((t) => (
+      <div className="flex flex-col gap-xs">
+        <p className="font-body-md m-0">Are you sure you want to delete this menu?</p>
+        <div className="flex gap-sm justify-end mt-2">
+          <button 
+            className="px-md py-xs bg-error text-on-error rounded-md text-sm font-label-md"
+            onClick={async () => {
+              toast.dismiss(t.id);
+              try {
+                await api.delete(`/menus/${id}`);
+                fetchMenus();
+                toast.success('Deleted successfully');
+              } catch (error) {
+                console.error('Failed to delete menu', error);
+                toast.error(error.response?.data?.message || 'Error deleting menu');
+              }
+            }}
+          >
+            Delete
+          </button>
+          <button 
+            className="px-md py-xs bg-[#444] rounded-md text-sm text-white font-label-md"
+            onClick={() => toast.dismiss(t.id)}
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    ), { duration: Infinity });
   };
 
   const columns = [
