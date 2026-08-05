@@ -21,6 +21,8 @@ import TreatmentTypeList from './pages/TreatmentTypeList';
 import TreatmentTypeForm from './pages/TreatmentTypeForm';
 import SpecialitiesList from './pages/SpecialitiesList';
 import SpecialitiesForm from './pages/SpecialitiesForm';
+import SubjectList from './pages/SubjectList';
+import SubjectForm from './pages/SubjectForm';
 
 function App() {
   return (
@@ -73,6 +75,10 @@ function App() {
           <Route path="specialities" element={<SpecialitiesList />} />
           <Route path="specialities/new" element={<SpecialitiesForm />} />
           <Route path="specialities/edit/:id" element={<SpecialitiesForm />} />
+          
+          <Route path="subjects" element={<SubjectList />} />
+          <Route path="subjects/new" element={<SubjectForm />} />
+          <Route path="subjects/edit/:id" element={<SubjectForm />} />
           
           <Route path="permissions" element={<RolePermissionForm />} />
           <Route path="permissions/:userTypeId" element={<RolePermissionForm />} />

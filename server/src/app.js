@@ -21,6 +21,7 @@ const languageRoutes = require('./routes/languageRoutes');
 const doctorRoutes = require('./routes/doctorRoutes');
 const treatmentTypeRoutes = require('./routes/treatmentTypeRoutes');
 const specialitiesRoutes = require('./routes/specialitiesRoutes');
+const subjectRoutes = require('./routes/subjectRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -32,6 +33,7 @@ app.use('/api/languages', languageRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/treatment-types', treatmentTypeRoutes);
 app.use('/api/specialities', specialitiesRoutes);
+app.use('/api/subjects', subjectRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

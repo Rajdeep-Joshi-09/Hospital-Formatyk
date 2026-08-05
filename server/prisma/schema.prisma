@@ -169,3 +169,16 @@ model Specialities {
 
   treatmentType TreatmentTypeMaster @relation(fields: [treatType], references: [id])
 }
+
+model SubjectMaster {
+  id           Int       @id @default(autoincrement())
+  subjects     String    @db.VarChar
+  isStatus     Int       @default(1)
+  isDelete     Int       @default(0)
+  createdBy    Int
+  createdDate  DateTime  @default(now())
+  modifiedBy   Int?
+  modifiedDate DateTime? @updatedAt
+  deletedBy    Int?
+  deletedDate  DateTime?
+}
