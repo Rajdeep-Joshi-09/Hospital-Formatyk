@@ -29,7 +29,7 @@ const BookAppointmentPage = () => {
         const response = await api.get('/public/doctors');
         const docs = response.data.result || [];
         setDoctors(docs);
-        
+
         // Extract unique departments from doctors' expertise
         const uniqueDepts = [];
         const seen = new Set();
@@ -71,6 +71,7 @@ const BookAppointmentPage = () => {
 
       await api.post('/public/appointments', {
         name: formData.name,
+        email: formData.email,
         phone: formData.phone,
         doctorId: formData.doctorId,
         appointmentDate: formData.date,
@@ -111,14 +112,12 @@ const BookAppointmentPage = () => {
         <div className="flex items-center justify-between mb-8 reveal active">
           {['Select Department', 'Choose Schedule', 'Your Details'].map((label, i) => (
             <div key={label} className="flex items-center gap-3 flex-1">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-['Inter'] text-[14px] font-bold transition-colors ${
-                step > i + 1 ? 'bg-[#00685c] text-white' : step === i + 1 ? 'bg-[#ac2b2e] text-white' : 'bg-[#e5e2e1] text-[#5f5e5e]'
-              }`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-['Inter'] text-[14px] font-bold transition-colors ${step > i + 1 ? 'bg-[#00685c] text-white' : step === i + 1 ? 'bg-[#ac2b2e] text-white' : 'bg-[#e5e2e1] text-[#5f5e5e]'
+                }`}>
                 {step > i + 1 ? <span className="material-symbols-outlined text-[18px]">check</span> : i + 1}
               </div>
-              <span className={`hidden sm:block font-['Inter'] text-[14px] font-medium ${
-                step === i + 1 ? 'text-[#ac2b2e]' : 'text-[#5f5e5e]'
-              }`}>
+              <span className={`hidden sm:block font-['Inter'] text-[14px] font-medium ${step === i + 1 ? 'text-[#ac2b2e]' : 'text-[#5f5e5e]'
+                }`}>
                 {label}
               </span>
               {i < 2 && <div className={`flex-1 h-0.5 mx-2 ${step > i + 1 ? 'bg-[#00685c]' : 'bg-[#e5e2e1]'}`} />}
@@ -134,7 +133,7 @@ const BookAppointmentPage = () => {
           {step === 1 && (
             <div className="space-y-6">
               <h2 className="font-['Playfair_Display'] text-[24px] font-semibold mb-4">Select Department & Doctor</h2>
-              
+
               {loading ? (
                 <div className="flex justify-center p-8">
                   <span className="material-symbols-outlined animate-spin text-[#ac2b2e] text-3xl">autorenew</span>
@@ -147,11 +146,10 @@ const BookAppointmentPage = () => {
                         key={dept.id}
                         type="button"
                         onClick={() => setFormData({ ...formData, departmentId: dept.id, departmentName: dept.name, doctorId: '', doctorName: '' })}
-                        className={`p-4 rounded-xl border-2 text-left font-['Inter'] text-[16px] font-medium transition-all ${
-                          formData.departmentId === dept.id
-                            ? 'border-[#ac2b2e] bg-[#fce2e0] text-[#ac2b2e]'
-                            : 'border-[#e0bfbc] hover:border-[#ac2b2e]/50 text-[#251817]'
-                        }`}
+                        className={`p-4 rounded-xl border-2 text-left font-['Inter'] text-[16px] font-medium transition-all ${formData.departmentId === dept.id
+                          ? 'border-[#ac2b2e] bg-[#fce2e0] text-[#ac2b2e]'
+                          : 'border-[#e0bfbc] hover:border-[#ac2b2e]/50 text-[#251817]'
+                          }`}
                       >
                         <div className="flex items-center gap-3">
                           <span className={`material-symbols-outlined ${formData.departmentId === dept.id ? 'text-[#ac2b2e]' : 'text-[#59413f]'}`}>
@@ -172,11 +170,10 @@ const BookAppointmentPage = () => {
                             key={doc.id}
                             type="button"
                             onClick={() => setFormData({ ...formData, doctorId: doc.id, doctorName: doc.name })}
-                            className={`p-4 rounded-xl border-2 text-left font-['Inter'] text-[14px] font-medium transition-all flex items-center gap-3 ${
-                              formData.doctorId === doc.id
-                                ? 'border-[#ac2b2e] bg-[#fce2e0] text-[#ac2b2e]'
-                                : 'border-[#e0bfbc] hover:border-[#ac2b2e]/50 text-[#251817]'
-                            }`}
+                            className={`p-4 rounded-xl border-2 text-left font-['Inter'] text-[14px] font-medium transition-all flex items-center gap-3 ${formData.doctorId === doc.id
+                              ? 'border-[#ac2b2e] bg-[#fce2e0] text-[#ac2b2e]'
+                              : 'border-[#e0bfbc] hover:border-[#ac2b2e]/50 text-[#251817]'
+                              }`}
                           >
                             <span className={`material-symbols-outlined ${formData.doctorId === doc.id ? 'text-[#ac2b2e]' : 'text-[#59413f]'}`}>
                               {formData.doctorId === doc.id ? 'check_circle' : 'person'}
@@ -226,11 +223,10 @@ const BookAppointmentPage = () => {
                       key={time}
                       type="button"
                       onClick={() => setFormData({ ...formData, time })}
-                      className={`py-3 px-2 rounded-xl border text-center font-['Inter'] text-[14px] font-medium transition-all ${
-                        formData.time === time
-                          ? 'border-[#ac2b2e] bg-[#fce2e0] text-[#ac2b2e]'
-                          : 'border-[#e0bfbc] hover:border-[#ac2b2e]/50 text-[#251817]'
-                      }`}
+                      className={`py-3 px-2 rounded-xl border text-center font-['Inter'] text-[14px] font-medium transition-all ${formData.time === time
+                        ? 'border-[#ac2b2e] bg-[#fce2e0] text-[#ac2b2e]'
+                        : 'border-[#e0bfbc] hover:border-[#ac2b2e]/50 text-[#251817]'
+                        }`}
                     >
                       {time}
                     </button>
