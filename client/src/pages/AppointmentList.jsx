@@ -27,7 +27,13 @@ const AppointmentList = () => {
   };
 
   useEffect(() => {
-    fetchAppointments();
+    const loadAppointments = async () => {
+      setLoading(true);
+      await fetchAppointments();
+      setLoading(false);
+    };
+
+    loadAppointments();
   }, []);
 
   const handleStatusChange = async (id, status) => {
@@ -35,6 +41,11 @@ const AppointmentList = () => {
       const response = await api.put(`/appointments/${id}/status`, { status });
       if (response.data.status) {
         toast.success(`Appointment ${status.toLowerCase()} successfully`);
+        setAppointments((currentAppointments) =>
+          currentAppointments.map((appointment) =>
+            appointment.id === id ? { ...appointment, status } : appointment
+          )
+        );
         fetchAppointments();
       }
     } catch (error) {
