@@ -182,7 +182,7 @@ exports.createPublicInquiry = async (req, res) => {
 
 exports.createPublicAppointment = async (req, res) => {
   try {
-    const { name, phone, doctorId, appointmentDate, appointmentTime, reason, fcmToken } = req.body;
+    const { name, email, phone, doctorId, appointmentDate, appointmentTime, reason, fcmToken } = req.body;
 
     if (!name || !phone || !doctorId || !appointmentDate || !appointmentTime) {
       return sendError(res, 'Name, phone, doctor, date, and time are required', 400);
@@ -198,15 +198,28 @@ exports.createPublicAppointment = async (req, res) => {
         data: {
           name,
           phone,
+          email: email || null,
           fcmToken,
           createdBy: 0
         }
       });
-    } else if (fcmToken && patient.fcmToken !== fcmToken) {
-      patient = await prisma.patient.update({
-        where: { id: patient.id },
-        data: { fcmToken }
-      });
+    } else {
+      const patientUpdates = {};
+
+      if (email && patient.email !== email) {
+        patientUpdates.email = email;
+      }
+
+      if (fcmToken && patient.fcmToken !== fcmToken) {
+        patientUpdates.fcmToken = fcmToken;
+      }
+
+      if (Object.keys(patientUpdates).length > 0) {
+        patient = await prisma.patient.update({
+          where: { id: patient.id },
+          data: patientUpdates
+        });
+      }
     }
 
     const appointment = await prisma.appointment.create({

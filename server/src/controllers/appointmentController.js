@@ -2,11 +2,31 @@ const { PrismaClient } = require('@prisma/client');
 const { PrismaPg } = require('@prisma/adapter-pg');
 const { Pool } = require('pg');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
-const admin = require('../utils/firebaseAdmin');
+const { sendAppointmentApprovalEmail } = require('../utils/email');
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
+
+const buildApprovalMessage = (appointment) => {
+  const doctorName = appointment.doctor?.name || 'your doctor';
+  const appointmentDate = new Date(appointment.appointmentDate).toLocaleDateString('en-GB');
+
+  return `Your appointment with Dr. ${doctorName} on ${appointmentDate} at ${appointment.appointmentTime} has been approved.`;
+};
+
+const buildApprovalEmailData = (appointment) => {
+  const doctorName = appointment.doctor?.name || 'your doctor';
+  const appointmentDate = new Date(appointment.appointmentDate).toLocaleDateString('en-GB');
+
+  return {
+    patientName: appointment.patient?.name || 'there',
+    doctorName,
+    appointmentDate,
+    appointmentTime: appointment.appointmentTime,
+    message: `Your appointment with Dr. ${doctorName} on ${appointmentDate} at ${appointment.appointmentTime} has been approved.`,
+  };
+};
 
 exports.getAppointments = async (req, res) => {
   try {
@@ -48,7 +68,8 @@ exports.updateAppointmentStatus = async (req, res) => {
     // If status is Approved, generate a notification for the patient
     if (status === 'Approved') {
       const title = 'Appointment Approved';
-      const description = `Your appointment with Dr. ${appointment.doctor?.name || ''} on ${new Date(appointment.appointmentDate).toLocaleDateString()} at ${appointment.appointmentTime} has been approved.`;
+      const description = buildApprovalMessage(appointment);
+      const emailData = buildApprovalEmailData(appointment);
 
       await prisma.notification.create({
         data: {
@@ -59,20 +80,22 @@ exports.updateAppointmentStatus = async (req, res) => {
         }
       });
 
-      // Send Firebase Push Notification if token exists
-      if (appointment.patient?.fcmToken) {
+      if (appointment.patient?.email) {
         try {
-          await admin.messaging().send({
-            token: appointment.patient.fcmToken,
-            notification: {
-              title,
-              body: description
-            }
+          await sendAppointmentApprovalEmail({
+            to: appointment.patient.email,
+            patientName: emailData.patientName,
+            doctorName: emailData.doctorName,
+            appointmentDate: emailData.appointmentDate,
+            appointmentTime: emailData.appointmentTime,
+            message: emailData.message
           });
-          console.log('Push notification sent successfully to patient:', appointment.patientId);
-        } catch (fcmError) {
-          console.error('Error sending push notification:', fcmError);
+          console.log('Approval email sent successfully to patient:', appointment.patientId);
+        } catch (emailError) {
+          console.error('Error sending approval email:', emailError);
         }
+      } else {
+        console.warn('Approval email skipped: patient email is missing for patient:', appointment.patientId);
       }
     }
 

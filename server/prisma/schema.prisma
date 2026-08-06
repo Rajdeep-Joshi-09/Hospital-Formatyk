@@ -190,6 +190,7 @@ model Patient {
   id           Int       @id @default(autoincrement())
   name         String    @db.VarChar
   phone        String    @db.VarChar
+  email        String?   @db.VarChar
   isStatus     Int       @default(1)
   isDelete     Int       @default(0)
   createdBy    Int       @default(0)
