@@ -135,6 +135,8 @@ model Doctor {
 
   expertiesMaster ExpertiesMaster @relation(fields: [experties], references: [id])
   languageMaster  LanguageMaster  @relation(fields: [languages], references: [id])
+  appointments    Appointment[]
+  reviews         Review[]
 }
 
 model TreatmentTypeMaster {
@@ -181,4 +183,88 @@ model SubjectMaster {
   modifiedDate DateTime? @updatedAt
   deletedBy    Int?
   deletedDate  DateTime?
+  inquiries    Inquiry[]
+}
+
+model Patient {
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar
+  phone        String    @db.VarChar
+  isStatus     Int       @default(1)
+  isDelete     Int       @default(0)
+  createdBy    Int       @default(0)
+  createdDate  DateTime  @default(now())
+  fcmToken     String?   @db.VarChar
+  modifiedBy   Int?
+  modifiedDate DateTime? @updatedAt
+  deletedBy    Int?
+  deletedDate  DateTime?
+
+  appointments  Appointment[]
+  reviews       Review[]
+  notifications Notification[]
+}
+
+model Inquiry {
+  id           Int       @id @default(autoincrement())
+  name         String    @db.VarChar
+  email        String    @db.VarChar
+  phoneNumber  String    @db.VarChar
+  subjectId    Int
+  message      String    @db.VarChar
+  isStatus     Int       @default(1)
+  isDelete     Int       @default(0)
+  createdBy    Int       @default(0)
+  createdDate  DateTime  @default(now())
+
+  subject      SubjectMaster @relation(fields: [subjectId], references: [id])
+}
+
+model Appointment {
+  id              Int       @id @default(autoincrement())
+  patientId       Int
+  doctorId        Int
+  appointmentDate DateTime
+  appointmentTime String    @db.VarChar
+  reason          String?   @db.VarChar
+  status          String    @default("Pending") @db.VarChar
+  createdBy       Int       @default(0)
+  createdDate     DateTime  @default(now())
+  modifiedBy      Int?
+  modifiedDate    DateTime? @updatedAt
+
+  patient Patient @relation(fields: [patientId], references: [id])
+  doctor  Doctor  @relation(fields: [doctorId], references: [id])
+}
+
+model Review {
+  id                Int       @id @default(autoincrement())
+  patientId         Int
+  doctorId          Int
+  reviewDescription String    @db.VarChar
+  ratings           Int
+  isStatus          Int       @default(1)
+  isDelete          Int       @default(0)
+  createdBy         Int       @default(0)
+  createdDate       DateTime  @default(now())
+
+  patient Patient @relation(fields: [patientId], references: [id])
+  doctor  Doctor  @relation(fields: [doctorId], references: [id])
+}
+
+model Notification {
+  id           Int       @id @default(autoincrement())
+  title        String    @db.VarChar
+  description  String    @db.VarChar
+  patientId    Int
+  isStatus     Int       @default(1)
+  isDelete     Int       @default(0)
+  createdBy    Int       @default(0)
+  createdDate  DateTime  @default(now())
+  modifiedBy   Int?
+  modifiedDate DateTime? @updatedAt
+  deletedBy    Int?
+  deletedDate  DateTime?
+
+  patient Patient @relation(fields: [patientId], references: [id])
 }

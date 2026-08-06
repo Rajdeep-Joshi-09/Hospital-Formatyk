@@ -1,8 +1,22 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import api from '../../utils/api';
 
 const HomePage = () => {
   const pageRef = useRef(null);
+  const [reviews, setReviews] = useState([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await api.get('/public/reviews');
+        setReviews(response.data.result || []);
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      }
+    };
+    fetchReviews();
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -196,27 +210,32 @@ const HomePage = () => {
           <div className="text-center mb-12 reveal">
             <h2 className="font-['Playfair_Display'] text-[32px] font-semibold">Voices of Recovery</h2>
           </div>
-          <div className="reveal">
-            <div className="bg-white p-12 rounded-[32px] shadow-[0px_4px_40px_rgba(0,0,0,0.06)] border border-[#e0bfbc] text-center">
-              <div className="w-24 h-24 mx-auto rounded-full overflow-hidden mb-6 border-4 border-[#ac2b2e]/10">
-                <img
-                  alt="Testimonial Portrait"
-                  className="w-full h-full object-cover"
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgOs8Nlp1zaQZjUTWEHzMCMehygduWhNzOTzfEew04RrNqlyPzTy4PD9WRkZQTuJNPba7et3G_Y_MbqS83mLaVEqfsSYirofzZnJKiKYixKRoa74KxkfpJrcaOkzHxCXl7jWV7rQswJwgBA9rGErgoF1EYOhQBREu2IQ-jACZii23Qux9Ay7ozfkj91Ya4Ca6CINR4BnVtNFWob-hqd9whMt_nQZigyz8aJuvg8-mDB-F-5px0efiHlQ"
-                />
-              </div>
-              <div className="flex justify-center gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <span key={i} className="material-symbols-outlined text-[#ac2b2e]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                ))}
-              </div>
-              <p className="font-['Playfair_Display'] text-[24px] font-semibold italic mb-6 text-[#59413f]">
-                "The level of care and personal attention I received at LuxCare was beyond anything I've experienced. The doctors took time to explain everything, and the facility itself felt more like a resort than a hospital."
-              </p>
-              <p className="font-['Inter'] text-[14px] font-semibold text-[#ac2b2e]">Sarah J. Miller</p>
-              <p className="font-['Inter'] text-[12px] text-[#5f5e5e]">Cardiology Patient</p>
+          {reviews.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {reviews.slice(0, 3).map((review, idx) => (
+                <div key={review.id} className="reveal" style={{ transitionDelay: `${(idx + 1) * 100}ms` }}>
+                  <div className="bg-white p-8 rounded-[32px] shadow-sm border border-[#e0bfbc] text-center h-full flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-center gap-1 mb-4">
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i} className="material-symbols-outlined text-[#ac2b2e]" style={{ fontVariationSettings: i < review.ratings ? "'FILL' 1" : "'FILL' 0" }}>star</span>
+                        ))}
+                      </div>
+                      <p className="font-['Playfair_Display'] text-[18px] font-semibold italic mb-6 text-[#59413f]">
+                        "{review.reviewDescription}"
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-['Inter'] text-[14px] font-semibold text-[#ac2b2e]">{review.patient?.name}</p>
+                      <p className="font-['Inter'] text-[12px] text-[#5f5e5e]">Patient of Dr. {review.doctor?.name.split(' ')[1] || review.doctor?.name}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
+          ) : (
+            <div className="text-center text-[#59413f] font-['Inter']">No reviews found.</div>
+          )}
         </div>
       </section>
 

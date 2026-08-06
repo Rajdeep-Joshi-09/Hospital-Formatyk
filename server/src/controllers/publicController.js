@@ -38,7 +38,12 @@ exports.getPublicDoctorById = async (req, res) => {
       where: { id },
       include: {
         expertiesMaster: true,
-        languageMaster: true
+        languageMaster: true,
+        reviews: {
+          where: { isDelete: 0, isStatus: 1 },
+          include: { patient: true },
+          orderBy: { id: 'desc' }
+        }
       }
     });
 
@@ -113,5 +118,136 @@ exports.getPublicTreatmentTypes = async (req, res) => {
   } catch (error) {
     console.error('Get public treatment types error:', error);
     return sendError(res, 'Server error while retrieving treatment types');
+  }
+};
+
+exports.getPublicSubjects = async (req, res) => {
+  try {
+    const subjects = await prisma.subjectMaster.findMany({
+      where: {
+        isDelete: 0,
+        isStatus: 1
+      },
+      orderBy: {
+        id: 'asc'
+      }
+    });
+    return sendSuccess(res, 'Subjects retrieved successfully', subjects);
+  } catch (error) {
+    console.error('Get public subjects error:', error);
+    return sendError(res, 'Server error while retrieving subjects');
+  }
+};
+
+exports.createPublicInquiry = async (req, res) => {
+  try {
+    const { name, email, phone, subjectId, message } = req.body;
+
+    if (!name || !phone || !subjectId || !message) {
+      return sendError(res, 'Name, phone, subject, and message are required', 400);
+    }
+
+    // Auto-create or find patient by phone
+    let patient = await prisma.patient.findFirst({
+      where: { phone, isDelete: 0 }
+    });
+
+    if (!patient) {
+      patient = await prisma.patient.create({
+        data: {
+          name,
+          phone,
+          createdBy: 0
+        }
+      });
+    }
+
+    const inquiry = await prisma.inquiry.create({
+      data: {
+        name,
+        email: email || '',
+        phoneNumber: phone,
+        subjectId: parseInt(subjectId),
+        message,
+        createdBy: 0
+      }
+    });
+
+    return sendSuccess(res, 'Inquiry submitted successfully', inquiry, 201);
+  } catch (error) {
+    console.error('Create public inquiry error:', error);
+    return sendError(res, 'Server error while submitting inquiry');
+  }
+};
+
+exports.createPublicAppointment = async (req, res) => {
+  try {
+    const { name, phone, doctorId, appointmentDate, appointmentTime, reason, fcmToken } = req.body;
+
+    if (!name || !phone || !doctorId || !appointmentDate || !appointmentTime) {
+      return sendError(res, 'Name, phone, doctor, date, and time are required', 400);
+    }
+
+    // Auto-create or find patient by phone
+    let patient = await prisma.patient.findFirst({
+      where: { phone, isDelete: 0 }
+    });
+
+    if (!patient) {
+      patient = await prisma.patient.create({
+        data: {
+          name,
+          phone,
+          fcmToken,
+          createdBy: 0
+        }
+      });
+    } else if (fcmToken && patient.fcmToken !== fcmToken) {
+      patient = await prisma.patient.update({
+        where: { id: patient.id },
+        data: { fcmToken }
+      });
+    }
+
+    const appointment = await prisma.appointment.create({
+      data: {
+        patientId: patient.id,
+        doctorId: parseInt(doctorId),
+        appointmentDate: new Date(appointmentDate),
+        appointmentTime,
+        reason: reason || '',
+        createdBy: 0
+      }
+    });
+
+    return sendSuccess(res, 'Appointment booked successfully', appointment, 201);
+  } catch (error) {
+    console.error('Create public appointment error:', error);
+    return sendError(res, 'Server error while booking appointment');
+  }
+};
+
+exports.getPublicReviews = async (req, res) => {
+  try {
+    const reviews = await prisma.review.findMany({
+      where: {
+        isDelete: 0,
+        isStatus: 1
+      },
+      include: {
+        patient: true,
+        doctor: {
+          include: { expertiesMaster: true }
+        }
+      },
+      orderBy: {
+        ratings: 'desc'
+      },
+      take: 6
+    });
+    return sendSuccess(res, 'Reviews retrieved successfully', reviews);
+  } catch (error) {
+    console.error('Get public reviews error:', error);
+    return sendError(res, 'Server error while retrieving reviews');
   }
 };

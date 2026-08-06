@@ -23,6 +23,9 @@ const treatmentTypeRoutes = require('./routes/treatmentTypeRoutes');
 const specialitiesRoutes = require('./routes/specialitiesRoutes');
 const subjectRoutes = require('./routes/subjectRoutes');
 const publicRoutes = require('./routes/publicRoutes');
+const patientRoutes = require('./routes/patientRoutes');
+const inquiryRoutes = require('./routes/inquiryRoutes');
+const appointmentRoutes = require('./routes/appointmentRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
@@ -36,6 +39,9 @@ app.use('/api/treatment-types', treatmentTypeRoutes);
 app.use('/api/specialities', specialitiesRoutes);
 app.use('/api/subjects', subjectRoutes);
 app.use('/api/public', publicRoutes);
+app.use('/api/patients', patientRoutes);
+app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 // Basic route
 app.get('/', (req, res) => {

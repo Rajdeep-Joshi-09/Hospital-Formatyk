@@ -24,6 +24,9 @@ import SpecialitiesList from './pages/SpecialitiesList';
 import SpecialitiesForm from './pages/SpecialitiesForm';
 import SubjectList from './pages/SubjectList';
 import SubjectForm from './pages/SubjectForm';
+import PatientList from './pages/PatientList';
+import InquiryList from './pages/InquiryList';
+import AppointmentList from './pages/AppointmentList';
 
 // Client pages
 import HomePage from './pages/client/HomePage';
@@ -104,6 +107,10 @@ function App() {
           <Route path="subjects/new" element={<SubjectForm />} />
           <Route path="subjects/edit/:id" element={<SubjectForm />} />
           
+          <Route path="patients" element={<PatientList />} />
+          <Route path="inquiries" element={<InquiryList />} />
+          <Route path="appointments" element={<AppointmentList />} />
+
           <Route path="permissions" element={<RolePermissionForm />} />
           <Route path="permissions/:userTypeId" element={<RolePermissionForm />} />
         </Route>

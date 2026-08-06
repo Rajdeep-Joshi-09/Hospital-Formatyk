@@ -8,6 +8,11 @@ const ExpertDetailPage = () => {
   const [doctor, setDoctor] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const avgRating = doctor?.reviews?.length 
+    ? (doctor.reviews.reduce((acc, curr) => acc + curr.ratings, 0) / doctor.reviews.length).toFixed(1)
+    : '5.0';
+  const reviewCount = doctor?.reviews?.length || 0;
+
   useEffect(() => {
     window.scrollTo(0, 0);
     const fetchDoctor = async () => {
@@ -87,7 +92,7 @@ const ExpertDetailPage = () => {
               )}
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-yellow-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                <span className="font-['Inter'] text-[14px] font-semibold">5.0 Rating</span>
+                <span className="font-['Inter'] text-[14px] font-semibold">{avgRating} Rating ({reviewCount} reviews)</span>
               </div>
               <div className="flex items-center gap-2">
                 <span className="material-symbols-outlined text-[#ac2b2e]">language</span>
@@ -130,6 +135,29 @@ const ExpertDetailPage = () => {
               Book Appointment with {doctor.name.split(' ')[1] || doctor.name}
             </Link>
           </div>
+        </div>
+
+        {/* Patient Reviews Section */}
+        <div className="mt-20 reveal">
+          <h2 className="font-['Playfair_Display'] text-[32px] font-bold text-[#251817] mb-8">Patient Reviews</h2>
+          {doctor.reviews && doctor.reviews.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {doctor.reviews.map(review => (
+                <div key={review.id} className="bg-white p-6 rounded-[24px] shadow-sm border border-[#e0bfbc]">
+                  <div className="flex gap-1 mb-4">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className="material-symbols-outlined text-[#ac2b2e]" style={{ fontVariationSettings: i < review.ratings ? "'FILL' 1" : "'FILL' 0" }}>star</span>
+                    ))}
+                  </div>
+                  <p className="font-['Inter'] text-[16px] italic text-[#59413f] mb-4">"{review.reviewDescription}"</p>
+                  <p className="font-['Inter'] text-[14px] font-semibold text-[#ac2b2e]">{review.patient?.name || 'Anonymous'}</p>
+                  <p className="font-['Inter'] text-[12px] text-[#5f5e5e]">{new Date(review.createdDate).toLocaleDateString()}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="font-['Inter'] text-[#59413f]">No reviews yet.</p>
+          )}
         </div>
       </section>
     </div>

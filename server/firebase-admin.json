@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "hospital-formatyk",
+  "private_key_id": "08e44514f0f49d0f64dffc6e838ea6c6ef8b4b10",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC+D+5ACAWh9ZMG\ndWILxYAENK79jXn03vyu4oK7KPtdjvdArl+IQNMbEXKxGS9zZTEqH0tp1sGgHGKV\n1x012Tbs91pavLfh+LhAX3sDvSVY5l4QS7ME9dezJUyTz5QyiOkUYKPbBeoRC5UG\nhzeCpRTE5hLmwN616EI5J1SSBGUxodffIpQdLdC+AR++RfBo4Wh8F1uqy44xpM6W\nSVvBGpnlDm4/DZoRYPzft69TjL0v7ff0VDJqbd17I+cdFT6WucO5CEc7HcGswklh\n80GqTHYmfXlIDI40mVaD0DX3PbhTqS0ckrsYRkonf+A9n3NJzlL0RGKGm43kEACx\ntb1LMJZDAgMBAAECggEAGwf3VG+vpBAMrTukSlSjDItqTeZsBMnID0lo2sc32jUQ\nm52RObbahLwvtISxTSIEYt9uNtXT1k/jLONvee6e6LHp+Fi5ywTi6POLcoXZWhzy\nyNzd+k51XeW9T+e9xeLXSiN6emvgv97b/usxQmlJxxKKd/t7UUzV9PylLa/mrS7+\nzj10c490dswpQa7gFTwflXRfLZTHjse976DSpTJekEBdAb2mYMvVm2dLF1pbBnV5\nTI30YxNJq83obHkf7gwCZk8+ozRhM6U4PUZSEPKjevLs9O6cGOrbdkiVDs+DVChw\nRlKR2SEwFveujoJGPZzNALWd9YQsW97G2/L1yDGBDQKBgQDm7rfCmtwm4tJ1F9Ou\nweA2AuaxdupwPwv4lBxNV0PlUiv+7cfxamfkl6WeeJiytG3R754a2athTF2mU1b3\nDXqe+R2fZ8UITJpaHktE+Z2mGe7Q+iggSZHbMcDNS3Tl6dhCExEmZ7PIv7QNXTgK\nqyqFl95Di4U9dm89OZRvt6KlzQKBgQDSsXyqZeGV+45RWv2j8XnUecShfP91Muh3\nQIPnRSre0RYeFyRXDdyPndV5C7EoMPkuZi3K0TmqCvGWTy2ETGrJl7G4qclUf86x\nlh6JV4+ySIojLKhLDNFDiy/ZjVB0rIkr2k+tGKyVGAZWh/YC1zxT77Jn7y1jdLlb\nZ+404FEcTwKBgHRxrqssFxJskR6F8zFNhVb2w4h8o94RjGG9nT/KXuwFMTYMhCNR\nOi3j4Zk0yhpiLHYNUzXKyEX5kcdKgrF0VH5QswUr+AglSDdkyyNuknWs4eTyHsWZ\nEzjpr4RVJg7AiVFX9+/bnqX9NDcA6D9I69oNJ//7HCZPz+uZWyWx/QuJAoGAP8vG\nN8JJoCRfX3rxuiZwAUoto8g5gb88bH94cRqcdINS8yGGu2VTF5lu/gvwRH8vtED0\nNKlNkJNnu1+WJK0O2KO6CHRApfldGKCf9m4w8IbObQAkpTToWE9Y2cLUTb/AeSrN\nXVhPSYXQxXq9nvaVKcU2fAoL8EVzqp25nwEdDjkCgYEAjpgOm+U/jzzHYuireJSe\na+v1p0iMWbWMwo/iuUn4b+/KyYkeJgq1CbG+PnKzf+TrVK9jKCk/vCdNIl0GJupc\ndMfkdztK5Wa7NJsVVqyZOUMv9FfE/ChFfH0p8g6FMuwKVFAQUUM8STNzm7nbj0Ey\nAuPiR33/eyobdxUZN1oo04o=\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@hospital-formatyk.iam.gserviceaccount.com",
+  "client_id": "102869049244943608183",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40hospital-formatyk.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

@@ -1,9 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import api from '../../utils/api';
 
 const ContactPage = () => {
   const pageRef = useRef(null);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
+
+  const [subjects, setSubjects] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -11,14 +16,39 @@ const ContactPage = () => {
       { threshold: 0.1 }
     );
     pageRef.current?.querySelectorAll('.reveal').forEach((el) => observer.observe(el));
+    
+    const fetchSubjects = async () => {
+      try {
+        const response = await api.get('/public/subjects');
+        setSubjects(response.data.result || []);
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+      }
+    };
+    fetchSubjects();
+
     return () => observer.disconnect();
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Form submission logic
-    alert('Thank you for your message! We will get back to you soon.');
-    setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    setLoading(true);
+    try {
+      await api.post('/public/inquiries', {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        subjectId: formData.subject,
+        message: formData.message,
+      });
+      toast.success('Thank you for your message! We will get back to you soon.');
+      setFormData({ name: '', email: '', phone: '', subject: '', message: '' });
+    } catch (error) {
+      console.error('Submit inquiry error:', error);
+      toast.error('An error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -126,10 +156,9 @@ const ContactPage = () => {
                     required
                   >
                     <option value="">Select a subject</option>
-                    <option value="appointment">Book Appointment</option>
-                    <option value="general">General Inquiry</option>
-                    <option value="feedback">Feedback</option>
-                    <option value="emergency">Emergency</option>
+                    {subjects.map((sub) => (
+                      <option key={sub.id} value={sub.id}>{sub.subjects}</option>
+                    ))}
                   </select>
                 </div>
               </div>
@@ -146,9 +175,10 @@ const ContactPage = () => {
               </div>
               <button
                 type="submit"
-                className="w-full md:w-auto bg-[#D74A49] text-white px-12 py-4 rounded-xl font-['Inter'] text-[14px] font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+                disabled={loading}
+                className="w-full md:w-auto bg-[#D74A49] text-white px-12 py-4 rounded-xl font-['Inter'] text-[14px] font-semibold shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 disabled:opacity-50"
               >
-                Send Message
+                {loading ? 'Sending...' : 'Send Message'}
               </button>
             </form>
           </div>
