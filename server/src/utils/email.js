@@ -3,12 +3,28 @@ const nodemailer = require('nodemailer');
 const createTransporter = () => {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
   const port = parseInt(process.env.SMTP_PORT || '465', 10);
-  const secure = String(process.env.SMTP_SECURE || 'true').toLowerCase() === 'true';
+  const secure = process.env.SMTP_SECURE !== undefined 
+    ? String(process.env.SMTP_SECURE).toLowerCase() === 'true'
+    : port === 465;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
   if (!user || !pass) {
     throw new Error('SMTP is not configured. Set SMTP_USER and SMTP_PASS in server/.env.');
+  }
+
+  // If using Gmail, service: 'gmail' is much more reliable on cloud platforms like Render
+  if (host === 'smtp.gmail.com') {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user,
+        pass,
+      },
+      tls: {
+        rejectUnauthorized: false,
+      },
+    });
   }
 
   return nodemailer.createTransport({
@@ -19,6 +35,10 @@ const createTransporter = () => {
       user,
       pass,
     },
+    tls: {
+      rejectUnauthorized: false,
+    },
+    connectionTimeout: 10000,
   });
 };
 
