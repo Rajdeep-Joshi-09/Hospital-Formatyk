@@ -5,7 +5,7 @@ const createTransporter = () => {
   const port = parseInt(process.env.SMTP_PORT || '465', 10);
   const secure = process.env.SMTP_SECURE !== undefined 
     ? String(process.env.SMTP_SECURE).toLowerCase() === 'true'
-    : port === 465;
+    : true;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
@@ -16,11 +16,12 @@ const createTransporter = () => {
     throw new Error('SMTP is not configured. Please set SMTP_USER and SMTP_PASS in environment variables.');
   }
 
-  // Gmail-specific configuration with connection timeouts for cloud hosts
+  // Gmail-specific configuration forcing IPv4 family (family: 4) to avoid ENETUNREACH IPv6 blocks on Render
   if (host === 'smtp.gmail.com') {
     return nodemailer.createTransport({
       service: 'gmail',
       auth: { user, pass },
+      family: 4, // Force IPv4 resolution
       tls: { rejectUnauthorized: false },
       connectionTimeout: 20000,
       greetingTimeout: 20000,
@@ -33,6 +34,7 @@ const createTransporter = () => {
     port,
     secure,
     auth: { user, pass },
+    family: 4, // Force IPv4 resolution
     tls: { rejectUnauthorized: false },
     connectionTimeout: 20000,
     greetingTimeout: 20000,
