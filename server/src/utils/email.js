@@ -34,35 +34,58 @@ const buildApprovalEmailHtml = ({ patientName, doctorName, appointmentDate, appo
 
 const sendAppointmentApprovalEmail = async ({ to, patientName, doctorName, appointmentDate, appointmentTime, message }) => {
   const apiKey = process.env.RESEND_API_KEY;
+  console.log('[EMAIL DEBUG] Starting sendAppointmentApprovalEmail process...');
+  console.log('[EMAIL DEBUG] Target recipient email (to):', to);
+  console.log('[EMAIL DEBUG] RESEND_API_KEY present:', !!apiKey, apiKey ? `(starts with ${apiKey.substring(0, 7)}...)` : '');
+
   if (!apiKey) {
+    console.error('[EMAIL ERROR] RESEND_API_KEY is not configured in environment variables.');
     throw new Error('RESEND_API_KEY is not configured in environment variables.');
   }
 
-  const from = process.env.RESEND_FROM || 'CliFormatyk <onboarding@resend.dev>';
+  // Resend DOES NOT allow sending from @gmail.com without domain verification.
+  // Use onboarding@resend.dev if RESEND_FROM is not set or uses @gmail.com
+  let from = process.env.RESEND_FROM || 'CliFormatyk <onboarding@resend.dev>';
+  if (from.includes('@gmail.com') || from.includes('@yahoo.com') || from.includes('@hotmail.com')) {
+    console.warn(`[EMAIL WARNING] RESEND_FROM "${from}" uses a free email provider (@gmail/@yahoo) which Resend blocks. Falling back to "CliFormatyk <onboarding@resend.dev>".`);
+    from = 'CliFormatyk <onboarding@resend.dev>';
+  }
+
+  console.log('[EMAIL DEBUG] Sender email (from):', from);
+
   const html = buildApprovalEmailHtml({ patientName, doctorName, appointmentDate, appointmentTime, message });
   const subject = 'Your Appointment Has Been Approved';
 
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from,
-      to: [to],
-      subject,
-      html,
-      text: message,
-    }),
-  });
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey.trim()}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        subject,
+        html,
+        text: message,
+      }),
+    });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(`Resend API error (${response.status}): ${JSON.stringify(errorData)}`);
+    const responseData = await response.json().catch(() => ({}));
+    console.log('[EMAIL DEBUG] Resend API Response Status:', response.status);
+    console.log('[EMAIL DEBUG] Resend API Response Data:', JSON.stringify(responseData, null, 2));
+
+    if (!response.ok) {
+      throw new Error(`Resend API Error (${response.status}): ${JSON.stringify(responseData)}`);
+    }
+
+    console.log('✅ [EMAIL SUCCESS] Approval email sent via Resend API successfully to:', to, 'Email ID:', responseData?.id);
+    return responseData;
+  } catch (err) {
+    console.error('❌ [EMAIL ERROR] Failed to send email via Resend:', err.message);
+    throw err;
   }
-
-  console.log('Approval email sent via Resend API successfully to:', to);
 };
 
 module.exports = {

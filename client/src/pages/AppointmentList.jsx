@@ -37,8 +37,10 @@ const AppointmentList = () => {
   }, []);
 
   const handleStatusChange = async (id, status) => {
+    console.log(`[FRONTEND DEBUG] Updating appointment #${id} status to "${status}"...`);
     try {
       const response = await api.put(`/appointments/${id}/status`, { status });
+      console.log('[FRONTEND DEBUG] Status update API response:', response.data);
       if (response.data.status) {
         toast.success(`Appointment ${status.toLowerCase()} successfully`);
         setAppointments((currentAppointments) =>
@@ -49,7 +51,7 @@ const AppointmentList = () => {
         fetchAppointments();
       }
     } catch (error) {
-      console.error(`Failed to update status to ${status}`, error);
+      console.error(`[FRONTEND ERROR] Failed to update status to ${status}`, error);
       toast.error(`Error updating status: ${error.response?.data?.message || error.message}`);
     }
   };

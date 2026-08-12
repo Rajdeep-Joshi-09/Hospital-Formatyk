@@ -51,14 +51,19 @@ exports.updateAppointmentStatus = async (req, res) => {
     const id = parseInt(req.params.id);
     const { status, createdBy } = req.body; // e.g. "Approved", "Rejected"
 
+    console.log(`[APPOINTMENT DEBUG] updateAppointmentStatus called for appointment ID: ${id}, Target Status: "${status}"`);
+
     const appointment = await prisma.appointment.findUnique({
       where: { id },
       include: { patient: true, doctor: true }
     });
 
     if (!appointment) {
+      console.warn(`[APPOINTMENT DEBUG] Appointment ID ${id} not found in database.`);
       return sendError(res, 'Appointment not found', 404);
     }
+
+    console.log(`[APPOINTMENT DEBUG] Found Appointment ID: ${appointment.id}, Patient ID: ${appointment.patientId}, Patient Email: "${appointment.patient?.email || 'N/A'}"`);
 
     const updatedAppointment = await prisma.appointment.update({
       where: { id },
@@ -67,6 +72,7 @@ exports.updateAppointmentStatus = async (req, res) => {
 
     // If status is Approved, generate a notification for the patient
     if (status === 'Approved') {
+      console.log(`[APPOINTMENT DEBUG] Status is Approved. Creating notification and checking patient email...`);
       const title = 'Appointment Approved';
       const description = buildApprovalMessage(appointment);
       const emailData = buildApprovalEmailData(appointment);
@@ -81,6 +87,7 @@ exports.updateAppointmentStatus = async (req, res) => {
       });
 
       if (appointment.patient?.email) {
+        console.log(`[APPOINTMENT DEBUG] Patient email found (${appointment.patient.email}). Attempting to send approval email...`);
         try {
           await sendAppointmentApprovalEmail({
             to: appointment.patient.email,
@@ -90,18 +97,20 @@ exports.updateAppointmentStatus = async (req, res) => {
             appointmentTime: emailData.appointmentTime,
             message: emailData.message
           });
-          console.log('Approval email sent successfully to patient:', appointment.patientId);
+          console.log('✅ [APPOINTMENT DEBUG] Approval email sent successfully to patient email:', appointment.patient.email);
         } catch (emailError) {
-          console.error('Error sending approval email:', emailError);
+          console.error('❌ [APPOINTMENT ERROR] Error sending approval email:', emailError);
         }
       } else {
-        console.warn('Approval email skipped: patient email is missing for patient:', appointment.patientId);
+        console.warn('⚠️ [APPOINTMENT WARNING] Approval email skipped: patient email is missing or empty for patient ID:', appointment.patientId);
       }
+    } else {
+      console.log(`[APPOINTMENT DEBUG] Status is "${status}" (not Approved), so email sending was not triggered.`);
     }
 
     return sendSuccess(res, 'Appointment status updated successfully', updatedAppointment);
   } catch (error) {
-    console.error('Update appointment status error:', error);
+    console.error('❌ [APPOINTMENT ERROR] Update appointment status error:', error);
     return sendError(res, 'Server error while updating appointment status');
   }
 };
