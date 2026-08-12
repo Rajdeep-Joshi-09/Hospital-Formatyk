@@ -3,29 +3,30 @@ const nodemailer = require('nodemailer');
 const createTransporter = () => {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
   const port = parseInt(process.env.SMTP_PORT || '465', 10);
-  const secure = process.env.SMTP_SECURE !== undefined 
-    ? String(process.env.SMTP_SECURE).toLowerCase() === 'true'
-    : true;
+  // Port 465 MUST use SSL (secure: true).
+  const secure = port === 465 || String(process.env.SMTP_SECURE || '').toLowerCase() === 'true';
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
-  console.log('[SMTP DEBUG] Creating Nodemailer transporter...');
+  console.log('[SMTP DEBUG] Creating Nodemailer SMTP transporter...');
   console.log('[SMTP DEBUG] Host:', host, 'Port:', port, 'Secure:', secure, 'User:', user);
 
   if (!user || !pass) {
     throw new Error('SMTP is not configured. Please set SMTP_USER and SMTP_PASS in environment variables.');
   }
 
-  // Gmail-specific configuration forcing IPv4 family (family: 4) to avoid ENETUNREACH IPv6 blocks on Render
+  // Gmail SMTP configuration over SSL (Port 465) with IPv4 family
   if (host === 'smtp.gmail.com') {
     return nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // Direct SSL connection
       auth: { user, pass },
-      family: 4, // Force IPv4 resolution
+      family: 4,    // Force IPv4
       tls: { rejectUnauthorized: false },
-      connectionTimeout: 20000,
-      greetingTimeout: 20000,
-      socketTimeout: 20000,
+      connectionTimeout: 25000,
+      greetingTimeout: 25000,
+      socketTimeout: 25000,
     });
   }
 
@@ -34,11 +35,11 @@ const createTransporter = () => {
     port,
     secure,
     auth: { user, pass },
-    family: 4, // Force IPv4 resolution
+    family: 4, // Force IPv4
     tls: { rejectUnauthorized: false },
-    connectionTimeout: 20000,
-    greetingTimeout: 20000,
-    socketTimeout: 20000,
+    connectionTimeout: 25000,
+    greetingTimeout: 25000,
+    socketTimeout: 25000,
   });
 };
 
