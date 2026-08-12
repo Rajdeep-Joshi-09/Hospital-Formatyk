@@ -77,15 +77,44 @@ const buildApprovalEmailHtml = ({ patientName, doctorName, appointmentDate, appo
 };
 
 const sendAppointmentApprovalEmail = async ({ to, patientName, doctorName, appointmentDate, appointmentTime, message }) => {
-  const transporter = createTransporter();
-  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+  const from = process.env.SMTP_FROM || process.env.SMTP_USER || 'CliFormatyk <onboarding@resend.dev>';
+  const html = buildApprovalEmailHtml({ patientName, doctorName, appointmentDate, appointmentTime, message });
+  const subject = 'Your Appointment Has Been Approved';
 
+  // If RESEND_API_KEY is defined, send via HTTP API (Bypasses Render SMTP port blocking 100%)
+  if (process.env.RESEND_API_KEY) {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: process.env.RESEND_FROM || 'CliFormatyk <onboarding@resend.dev>',
+        to: [to],
+        subject,
+        html,
+        text: message,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(`Resend API error (${response.status}): ${JSON.stringify(errorData)}`);
+    }
+
+    console.log('Approval email sent via Resend API successfully to:', to);
+    return;
+  }
+
+  // Fallback to Nodemailer SMTP (for Localhost development)
+  const transporter = createTransporter();
   await transporter.sendMail({
     from,
     to,
-    subject: 'Your Appointment Has Been Approved',
+    subject,
     text: message,
-    html: buildApprovalEmailHtml({ patientName, doctorName, appointmentDate, appointmentTime, message }),
+    html,
   });
 };
 
