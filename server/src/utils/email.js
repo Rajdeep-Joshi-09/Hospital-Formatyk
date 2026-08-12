@@ -1,47 +1,3 @@
-const nodemailer = require('nodemailer');
-
-const createTransporter = () => {
-  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const port = parseInt(process.env.SMTP_PORT || '465', 10);
-  const secure = process.env.SMTP_SECURE !== undefined 
-    ? String(process.env.SMTP_SECURE).toLowerCase() === 'true'
-    : port === 465;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
-
-  if (!user || !pass) {
-    throw new Error('SMTP is not configured. Set SMTP_USER and SMTP_PASS in server/.env.');
-  }
-
-  // If using Gmail, service: 'gmail' is much more reliable on cloud platforms like Render
-  if (host === 'smtp.gmail.com') {
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user,
-        pass,
-      },
-      tls: {
-        rejectUnauthorized: false,
-      },
-    });
-  }
-
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure,
-    auth: {
-      user,
-      pass,
-    },
-    tls: {
-      rejectUnauthorized: false,
-    },
-    connectionTimeout: 10000,
-  });
-};
-
 const buildApprovalEmailHtml = ({ patientName, doctorName, appointmentDate, appointmentTime, message }) => {
   return `
     <div style="margin:0;padding:0;background:#f7f3ef;font-family:Arial,Helvetica,sans-serif;">
@@ -77,45 +33,36 @@ const buildApprovalEmailHtml = ({ patientName, doctorName, appointmentDate, appo
 };
 
 const sendAppointmentApprovalEmail = async ({ to, patientName, doctorName, appointmentDate, appointmentTime, message }) => {
-  const from = process.env.SMTP_FROM || process.env.SMTP_USER || 'CliFormatyk <onboarding@resend.dev>';
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY is not configured in environment variables.');
+  }
+
+  const from = process.env.RESEND_FROM || 'CliFormatyk <onboarding@resend.dev>';
   const html = buildApprovalEmailHtml({ patientName, doctorName, appointmentDate, appointmentTime, message });
   const subject = 'Your Appointment Has Been Approved';
 
-  // If RESEND_API_KEY is defined, send via HTTP API (Bypasses Render SMTP port blocking 100%)
-  if (process.env.RESEND_API_KEY) {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: process.env.RESEND_FROM || 'CliFormatyk <onboarding@resend.dev>',
-        to: [to],
-        subject,
-        html,
-        text: message,
-      }),
-    });
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from,
+      to: [to],
+      subject,
+      html,
+      text: message,
+    }),
+  });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(`Resend API error (${response.status}): ${JSON.stringify(errorData)}`);
-    }
-
-    console.log('Approval email sent via Resend API successfully to:', to);
-    return;
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(`Resend API error (${response.status}): ${JSON.stringify(errorData)}`);
   }
 
-  // Fallback to Nodemailer SMTP (for Localhost development)
-  const transporter = createTransporter();
-  await transporter.sendMail({
-    from,
-    to,
-    subject,
-    text: message,
-    html,
-  });
+  console.log('Approval email sent via Resend API successfully to:', to);
 };
 
 module.exports = {
