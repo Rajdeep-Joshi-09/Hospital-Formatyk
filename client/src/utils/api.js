@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -29,11 +29,11 @@ api.interceptors.response.use(
       // Token is invalid, expired, or not present
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
-      
+
       // Define public routes that shouldn't redirect to login on 401
       const publicRoutes = ['/', '/login', '/about', '/contact', '/book-appointment', '/experts', '/specialities'];
       const isPublicRoute = publicRoutes.some(route => window.location.pathname === route || window.location.pathname.startsWith(route + '/'));
-      
+
       // Redirect to login page only if not on a public route
       if (!isPublicRoute) {
         window.location.href = '/login';
