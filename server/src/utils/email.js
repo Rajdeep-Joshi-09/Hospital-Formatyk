@@ -2,27 +2,22 @@ const nodemailer = require('nodemailer');
 
 const createTransporter = () => {
   const host = process.env.SMTP_HOST || 'smtp.gmail.com';
-  const port = parseInt(process.env.SMTP_PORT || '465', 10);
-  // Port 465 MUST use SSL (secure: true).
-  const secure = port === 465 || String(process.env.SMTP_SECURE || '').toLowerCase() === 'true';
+  const port = parseInt(process.env.SMTP_PORT || '587', 10);
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
 
   console.log('[SMTP DEBUG] Creating Nodemailer SMTP transporter...');
-  console.log('[SMTP DEBUG] Host:', host, 'Port:', port, 'Secure:', secure, 'User:', user);
+  console.log('[SMTP DEBUG] Host:', host, 'Port:', port, 'User:', user);
 
   if (!user || !pass) {
     throw new Error('SMTP is not configured. Please set SMTP_USER and SMTP_PASS in environment variables.');
   }
 
-  // Gmail SMTP configuration over SSL (Port 465) with IPv4 family
+  // Gmail configuration optimized for Render and Cloud environments
   if (host === 'smtp.gmail.com') {
     return nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true, // Direct SSL connection
+      service: 'gmail',
       auth: { user, pass },
-      family: 4,    // Force IPv4
       tls: { rejectUnauthorized: false },
       connectionTimeout: 25000,
       greetingTimeout: 25000,
@@ -30,12 +25,13 @@ const createTransporter = () => {
     });
   }
 
+  const secure = port === 465 || String(process.env.SMTP_SECURE || '').toLowerCase() === 'true';
+
   return nodemailer.createTransport({
     host,
     port,
     secure,
     auth: { user, pass },
-    family: 4, // Force IPv4
     tls: { rejectUnauthorized: false },
     connectionTimeout: 25000,
     greetingTimeout: 25000,
