@@ -1,4 +1,4 @@
-const { Resend } = require('resend');
+const { google } = require('googleapis');
 
 const buildApprovalEmailHtml = ({ patientName, doctorName, appointmentDate, appointmentTime, message }) => {
   return `
@@ -34,42 +34,67 @@ const buildApprovalEmailHtml = ({ patientName, doctorName, appointmentDate, appo
   `;
 };
 
+// Helper function to encode raw RFC 2822 email to URL-safe base64
+const createRawEmail = ({ from, to, subject, html }) => {
+  const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
+  const messageParts = [
+    `From: ${from}`,
+    `To: ${to}`,
+    `Subject: ${utf8Subject}`,
+    `MIME-Version: 1.0`,
+    `Content-Type: text/html; charset=utf-8`,
+    ``,
+    html
+  ];
+  const message = messageParts.join('\r\n');
+
+  return Buffer.from(message)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+};
+
 const sendAppointmentApprovalEmail = async ({ to, patientName, doctorName, appointmentDate, appointmentTime, message }) => {
-  console.log('[RESEND DEBUG] Starting sendAppointmentApprovalEmail via Resend...');
-  console.log('[RESEND DEBUG] Recipient (to):', to);
+  console.log('[GMAIL API DEBUG] Starting sendAppointmentApprovalEmail via Gmail REST API...');
+  console.log('[GMAIL API DEBUG] Recipient (to):', to);
 
-  const resendApiKey = process.env.RESEND_API_KEY;
+  const clientId = process.env.GMAIL_CLIENT_ID;
+  const clientSecret = process.env.GMAIL_CLIENT_SECRET;
+  const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
+  const fromUser = process.env.GMAIL_USER || process.env.SMTP_USER || 'team.formatyk@gmail.com';
 
-  if (!resendApiKey) {
-    throw new Error('RESEND_API_KEY is not configured in environment variables.');
+  if (!clientId || !clientSecret || !refreshToken) {
+    throw new Error('Gmail OAuth2 credentials missing. Please set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, and GMAIL_REFRESH_TOKEN in environment variables.');
   }
 
-  const resend = new Resend(resendApiKey);
-  
-  // Use onboarding@resend.dev as sender for free tier testing if SMTP_FROM is not properly configured for Resend
-  const from = process.env.SMTP_FROM || 'CliFormatyk <onboarding@resend.dev>';
-  
+  const oAuth2Client = new google.auth.OAuth2(
+    clientId,
+    clientSecret,
+    'https://developers.google.com/oauthplayground'
+  );
+
+  oAuth2Client.setCredentials({ refresh_token: refreshToken });
+
+  const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
   const html = buildApprovalEmailHtml({ patientName, doctorName, appointmentDate, appointmentTime, message });
   const subject = 'Your Appointment Has Been Approved';
+  const from = `CliFormatyk <${fromUser}>`;
+
+  const raw = createRawEmail({ from, to, subject, html });
 
   try {
-    const { data, error } = await resend.emails.send({
-      from,
-      to,
-      subject,
-      text: message,
-      html,
+    const response = await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: {
+        raw: raw,
+      },
     });
 
-    if (error) {
-      console.error('❌ [RESEND ERROR] Failed to send approval email via Resend API:', error);
-      throw error;
-    }
-
-    console.log('✅ [RESEND SUCCESS] Approval email sent successfully via Resend API:', data.id);
-    return data;
+    console.log('✅ [GMAIL API SUCCESS] Approval email sent successfully via Gmail REST API:', response.data.id);
+    return response.data;
   } catch (error) {
-    console.error('❌ [RESEND EXCEPTION] Error in sendAppointmentApprovalEmail:', error);
+    console.error('❌ [GMAIL API ERROR] Failed to send approval email via Gmail REST API:', error);
     throw error;
   }
 };
