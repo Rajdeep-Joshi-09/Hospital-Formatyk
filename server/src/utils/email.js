@@ -13,10 +13,12 @@ const createTransporter = () => {
     throw new Error('SMTP is not configured. Please set SMTP_USER and SMTP_PASS in environment variables.');
   }
 
-  // Gmail configuration optimized for Render and Cloud environments
-  if (host === 'smtp.gmail.com') {
+  // Gmail configuration forced to Port 587 (STARTTLS) for Render compatibility
+  if (host === 'smtp.gmail.com' || host === 'gmail') {
     return nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // STARTTLS over 587 (Port 465 is blocked on Render)
       auth: { user, pass },
       tls: { rejectUnauthorized: false },
       connectionTimeout: 25000,
