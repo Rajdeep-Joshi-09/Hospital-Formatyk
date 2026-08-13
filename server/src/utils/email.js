@@ -59,10 +59,10 @@ const sendAppointmentApprovalEmail = async ({ to, patientName, doctorName, appoi
   console.log('[GMAIL API DEBUG] Starting sendAppointmentApprovalEmail via Gmail REST API...');
   console.log('[GMAIL API DEBUG] Recipient (to):', to);
 
-  const clientId = process.env.GMAIL_CLIENT_ID;
-  const clientSecret = process.env.GMAIL_CLIENT_SECRET;
-  const refreshToken = process.env.GMAIL_REFRESH_TOKEN;
-  const fromUser = process.env.GMAIL_USER || process.env.SMTP_USER || 'team.formatyk@gmail.com';
+  const clientId = process.env.GMAIL_CLIENT_ID ? process.env.GMAIL_CLIENT_ID.trim() : null;
+  const clientSecret = process.env.GMAIL_CLIENT_SECRET ? process.env.GMAIL_CLIENT_SECRET.trim() : null;
+  const refreshToken = process.env.GMAIL_REFRESH_TOKEN ? process.env.GMAIL_REFRESH_TOKEN.trim() : null;
+  const fromUser = (process.env.GMAIL_USER || process.env.SMTP_USER || 'team.formatyk@gmail.com').trim();
 
   if (!clientId || !clientSecret || !refreshToken) {
     throw new Error('Gmail OAuth2 credentials missing. Please set GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, and GMAIL_REFRESH_TOKEN in environment variables.');
